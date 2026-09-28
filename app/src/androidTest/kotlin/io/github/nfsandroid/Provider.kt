@@ -16,7 +16,7 @@ import io.github.nfsandroid.log.NfsLog
 object Provider {
     val context = InstrumentationRegistry.getInstrumentation().targetContext!!
     val resolver = context.contentResolver!!
-    private val authority = "${context.packageName}.documents"
+    val authority = "${context.packageName}.documents"
     val host = InstrumentationRegistry.getArguments().getString("nfsServer", "10.0.2.2")
     const val ROOT = "ci:"
 

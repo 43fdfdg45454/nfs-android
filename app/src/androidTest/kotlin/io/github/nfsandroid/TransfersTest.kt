@@ -37,7 +37,9 @@ class TransfersTest {
         val inTree = Provider.children(DocumentsContract.getDocumentId(tree)).getValue("movie-a (1).bin")
         val received = received() - before
         Provider.report("Server copies: 2 × 256 MiB copied, 1 moved; ${received shr 10} KiB received")
-        assertTrue("the copies came through the device: $received bytes", received < 1 shl 20)
+        // Through the device, it would be 512 MiB; what else arrives meanwhile (listings, the reads the
+        // tests before left in flight) is a few MiB.
+        assertTrue("the copies came through the device: $received bytes", received < 16 shl 20)
         check(moved)
         check(Provider.uri(inTree))
         listOf(dir, tree).forEach { Provider.removeTree(DocumentsContract.getDocumentId(it)) }

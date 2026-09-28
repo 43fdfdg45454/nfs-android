@@ -28,8 +28,10 @@ class LinksTest {
     @Test
     fun findsThePathOfADocument() {
         Provider.setUp()
-        val path = DocumentsContract.findDocumentPath(Provider.resolver, Provider.uri(Provider.find("fixtures/movie-a.bin")))!!
-        assertEquals("ci", path.rootId)
+        // As an app asks it: within a tree it was given (a document's own URI needs MANAGE_DOCUMENTS).
+        val tree = DocumentsContract.buildTreeDocumentUri(Provider.authority, Provider.ROOT)
+        val movie = DocumentsContract.buildDocumentUriUsingTree(tree, Provider.find("fixtures/movie-a.bin"))
+        val path = DocumentsContract.findDocumentPath(Provider.resolver, movie)!!
         assertEquals(listOf("ci:", "ci:fixtures", "ci:fixtures/movie-a.bin"), path.path)
     }
 }
