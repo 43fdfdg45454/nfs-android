@@ -81,3 +81,6 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     fijadas por commit, sin credenciales guardadas y de solo lectura salvo el release. Solo TLS 1.3.
 26. **Sin backup ni transferencia de datos de la app:** la lista de servidores tiene sus
     direcciones y el nombre del certificado de cliente; al cambiar de teléfono se cargan de nuevo.
+27. **Permisos de lo que se crea, por servidor** (Identidad): tres opciones en vez de un número,
+    como máscara (umask) para el núcleo: estándar `022` (644 y 755, por defecto), grupo `002`
+    (664 y 775, para carpetas compartidas con setgid) y privado `077` (600 y 700).

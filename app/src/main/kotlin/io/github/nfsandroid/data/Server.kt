@@ -19,6 +19,8 @@ data class Server(
     val uid: Int = 0,
     val gid: Int = 0,
     val gids: List<Int> = emptyList(),
+    /** Permissions new files and folders do not get: [UMASK_STANDARD], [UMASK_GROUP] or [UMASK_PRIVATE]. */
+    val umask: Int = UMASK_STANDARD,
     /** 0: the transport's default. */
     val connections: Int = 0,
     val readAheadMb: Int = 256,
@@ -35,7 +37,7 @@ data class Server(
         put("id", id); put("name", name); put("host", host); put("port", port); put("export", export)
         put("transport", transport); put("security", security)
         put("certificateAlias", certificateAlias); put("uid", uid); put("gid", gid)
-        put("gids", JSONArray(gids)); put("connections", connections); put("readAheadMb", readAheadMb)
+        put("gids", JSONArray(gids)); put("umask", umask); put("connections", connections); put("readAheadMb", readAheadMb)
         put("useCache", useCache); put("readOnly", readOnly); put("enabled", enabled)
         put("networkKind", networkKind); put("networkSubnet", networkSubnet)
     }
@@ -46,6 +48,10 @@ data class Server(
     fun over(transport: String) = copy(transport = transport, port = if (port == defaultPort(this.transport)) defaultPort(transport) else port)
 
     companion object {
+        const val UMASK_STANDARD = 18 // 022: files 644, folders 755
+        const val UMASK_GROUP = 2 // 002: files 664, folders 775
+        const val UMASK_PRIVATE = 63 // 077: files 600, folders 700
+
         fun defaultPort(transport: String) = if (transport == "quic") 443 else 2049
 
         fun fromJson(o: JSONObject) = Server(
@@ -55,7 +61,7 @@ data class Server(
             security = o.optString("security", "none"), certificateAlias = o.optString("certificateAlias"),
             uid = o.optInt("uid"), gid = o.optInt("gid"),
             gids = o.optJSONArray("gids")?.let { a -> List(a.length()) { a.getInt(it) } } ?: emptyList(),
-            connections = o.optInt("connections"), readAheadMb = o.optInt("readAheadMb", 256),
+            umask = o.optInt("umask", UMASK_STANDARD), connections = o.optInt("connections"), readAheadMb = o.optInt("readAheadMb", 256),
             useCache = o.optBoolean("useCache", true), readOnly = o.optBoolean("readOnly"),
             enabled = o.optBoolean("enabled", true),
             networkKind = o.optString("networkKind", "any"), networkSubnet = o.optString("networkSubnet"),

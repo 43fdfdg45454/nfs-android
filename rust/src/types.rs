@@ -27,6 +27,8 @@ pub struct Server {
     pub uid: u32,
     pub gid: u32,
     pub gids: Vec<u32>,
+    /// Permissions new files (0666) and directories (0777) do not get, as a umask.
+    pub umask: u32,
     /// Stable per installation and server: two clients with one owner would each look like the
     /// other restarting to the server.
     pub owner: String,

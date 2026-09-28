@@ -59,6 +59,7 @@ pub async fn config(
         gids: server.gids.clone(),
     };
     let mut config = Config::new(transport, security, Auth::Sys(cred), server.owner.clone());
+    config.umask = server.umask;
     if server.connections > 0 {
         config.connections = server.connections as usize;
     }

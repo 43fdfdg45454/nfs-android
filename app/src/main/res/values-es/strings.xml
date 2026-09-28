@@ -72,6 +72,11 @@
     <string name="gid">GID</string>
     <string name="uid_help">Tu usuario y grupo en el servidor (id -u e id -g allá). Con all_squash en el export, el servidor los ignora.</string>
     <string name="gids">Otros grupos</string>
+    <string name="umask">Permisos de lo que creás</string>
+    <string name="umask_standard">Estándar</string>
+    <string name="umask_group">Grupo</string>
+    <string name="umask_private">Privado</string>
+    <string name="umask_help">Estándar: vos escribís y los demás leen (archivos 644, carpetas 755). Grupo: tu grupo también escribe (664, 775), para carpetas compartidas. Privado: solo vos (600, 700).</string>
     <string name="gids_help">Números de grupos que también te dan acceso, separados por comas.</string>
     <string name="section_performance">Rendimiento</string>
     <string name="section_performance_help">Los valores por defecto sirven para la mayoría de los enlaces</string>

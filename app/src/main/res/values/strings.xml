@@ -73,6 +73,11 @@
     <string name="gid">GID</string>
     <string name="uid_help">Your user and group on the server (id -u, id -g there). With all_squash in the export, the server ignores them.</string>
     <string name="gids">Other groups</string>
+    <string name="umask">Permissions of what you create</string>
+    <string name="umask_standard">Standard</string>
+    <string name="umask_group">Group</string>
+    <string name="umask_private">Private</string>
+    <string name="umask_help">Standard: you write, others read (files 644, folders 755). Group: your group writes too (664, 775), for shared folders. Private: only you (600, 700).</string>
     <string name="gids_help">Group numbers that also give you access, separated by commas.</string>
     <string name="section_performance">Performance</string>
     <string name="section_performance_help">The defaults suit most links</string>
