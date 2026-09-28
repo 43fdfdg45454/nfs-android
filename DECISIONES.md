@@ -1,0 +1,83 @@
+# Decisiones para revisar
+
+Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por qué.
+
+1. **Id de la app:** `io.github.nfsandroid`, nombre "NFS".
+2. **UI en Compose con tema propio** (índigo a cian, como el ícono; claro u oscuro según el
+   sistema), en tres pestañas: Servidores (resumen en vivo y una tarjeta por servidor, con
+   "Explorar" que abre el selector del sistema en su raíz), Actividad (red y cada servidor en
+   detalle, compartir el log) y Ajustes (caché, notificación, acerca de). La edición ocupa toda la
+   pantalla, por secciones con ayuda (conexión, seguridad, identidad, rendimiento, acceso, probar),
+   con validación y confirmación al descartar o quitar. Los archivos se ven y se abren desde el
+   selector del sistema (DocumentsProvider), no con un explorador propio.
+3. **Servidores en `files/servers.json`** con un número de formato: las versiones siguientes
+   tienen que seguir leyendo lo que guardaron las anteriores (campos nuevos con valor por defecto).
+4. **Confianza TLS:** la app le pasa al núcleo las CA de `AndroidCAStore` (del sistema y del
+   usuario). La configuración de red también confía en las del usuario.
+5. **Certificado de cliente:** se elige con `KeyChain.choosePrivateKeyAlias`. La clave no sale de
+   KeyChain: cada firma del handshake se hace en Kotlin (`KeyChainIdentity`). El mismo certificado
+   sirve para el QUIC exterior del gateway y para el mTLS del export.
+6. **Un montaje por servidor**, conectado al primer uso y cerrado a los 5 minutos sin uso. El
+   servicio en primer plano (`specialUse`) corre mientras haya alguno.
+7. **Owner del cliente NFS:** id de instalación (UUID guardado) + id del servidor.
+8. **Un hilo por descriptor abierto** en el proxy de archivos: dos reproductores no se esperan.
+9. **Firma del release:** con los secrets `NFS_KEYSTORE_BASE64` / `NFS_KEYSTORE_PASSWORD` de
+   este repositorio (alias `nfs`); sin ellos, con la clave de debug del runner,
+   que cambia en cada corrida (el APK no actualiza al anterior), y no se publica ningún release.
+10. **Emulador de la CI:** API 34 x86_64; alcanza nfsd del runner en `10.0.2.2` (alias estándar
+    del emulador; permitido en el chequeo de privacidad).
+11. **Cerrar y abrir, entre apps:** Android libera el descriptor de escritura un momento después
+    de que la app lo cierra, y lo último escrito recién llega al servidor ahí. Toda apertura de
+    un documento espera hasta 3 s a que terminen sus escritores abiertos. Costo: abrir un archivo
+    mientras otra app lo escribe demora hasta 3 s.
+12. **Modos de apertura:** `r` lee; `w`/`wt` crean o vacían; `rw` lee y escribe en el lugar;
+    `rwt` vacía y después lee y escribe; `wa` agrega al final (el proxy de archivos no conoce
+    `O_APPEND`: el descriptor se entrega posicionado al final). `fsync` confirma en el servidor.
+13. **Caché global:** una sola caché en disco (`cacheDir/nfs`, Android puede vaciarla si le falta
+    espacio) para todos los servidores, de 4 GB por defecto (0 la desactiva; nunca deja menos de
+    1 GB libre), con uso y botón para vaciarla; "Usar la caché local" la apaga por servidor. Un
+    tamaño nuevo vale para las conexiones que se hagan después.
+14. **Miniaturas:** imágenes (submuestreadas), videos (un cuadro cerca del primer segundo, leído
+    por el núcleo sin proxy) y audio (la tapa), de a dos a la vez para no competir con la
+    reproducción, guardadas por documento, fecha y tamaño.
+15. **Cambios de otros clientes:** las carpetas listadas en los últimos 2 minutos se revisan cada
+    15 s (un GETATTR cada una) y, si cambió su fecha de modificación, se avisa a quien las muestra.
+    Pasados 2 minutos sin listar ninguna, no se revisa nada. nfsd no ofrece delegaciones de
+    carpetas (`CB_NOTIFY`), así que no hay aviso del servidor.
+16. **Cambio de red:** el monitor de la red por defecto pide al núcleo reconectar al instante
+    cuando cambia la red o sus direcciones, y anota en el log cuándo Android bloquea la red de la
+    app. El diagnóstico muestra la red, los servidores conectados, los avisos de camino de
+    callbacks caído, y comparte los últimos 64 KB del log como texto.
+17. **Servidor nuevo con UID/GID 1000:** el primer usuario habitual de un Linux (0 es root; con
+    `root_squash` quedaría como nobody).
+18. **Notificación técnica:** título con bajada y subida; texto con servidores, conexiones
+    establecidas y llamadas en vuelo; expandida, una línea por servidor (transporte, conexiones,
+    en vuelo, RTT y pérdida por QUIC, archivos abiertos, reconexiones). Se actualiza cada 2 s.
+19. **Espacio en los selectores:** cada raíz publica espacio disponible y total (lo que muestran
+    los gestores de archivos que lo leen). El último valor conocido se guarda; se vuelve a preguntar en segundo
+    plano, a lo sumo cada 10 s, solo si el servidor ya está conectado.
+20. **Versiones con GitVersion** (`GitVersion.yml`, flujo trunk-based): cada commit en `master` es
+    un parche más desde la última etiqueta (`+semver: minor` o `major` en el mensaje suben más);
+    `versionCode` = mayor·10⁶ + menor·10³ + parche. Cada push a `master` con todo en verde publica
+    un release `vX.Y.Z` con el APK firmado y los commits desde el anterior. Empieza en 1.0.0 (`next-version`): las etiquetas las crea cada release.
+21. **Servidor deshabilitado:** se conserva con su configuración, sale de los selectores de
+    archivos y no se conecta por ningún camino (abrir, listar, vigilar carpetas). Deshabilitarlo
+    cierra sus conexiones en el momento, aunque haya archivos abiertos.
+22. **Servidor que no contesta (la VPN caída):** sin primera respuesta en 4 s falla; lo lento pero vivo tiene hasta 15 s, y cada llamada del
+    provider 20 s; tras una falla, durante 30 s todo pedido a ese servidor falla al instante, y un
+    cambio de red (la VPN que vuelve) lo borra para reintentar enseguida. Cada servidor conecta por
+    su lado: uno que no contesta no demora a los demás. Su tarjeta lo muestra.
+23. **Red de cada servidor:** cualquiera, VPN o Wi-Fi/cable, y opcionalmente la subred que esa red
+    le da al teléfono (cuál VPN, cuál Wi-Fi: Android no deja ver de qué app es la VPN, y el nombre
+    del Wi-Fi pide el permiso de ubicación). Sin esa red el servidor falla al instante; si se va con
+    el servidor conectado, se cierra. Dos Wi-Fi con la misma subred cuentan como la misma red.
+24. **Batería sin tocar el rendimiento:** las estadísticas en vivo se calculan solo mientras hay
+    servidores conectados o una pantalla las muestra; la notificación se vuelve a publicar solo si
+    cambió y, con la pantalla apagada, solo si cambió la cantidad de servidores conectados. El
+    núcleo lee por adelantado en tandas y QUIC manda pings cada 25 s (DECISIONES de nfs-core).
+25. **Seguridad en la CI** (`security.yml`, en cada push y a diario): `cargo deny` sobre el puente,
+    secretos en el historial (gitleaks), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions)
+    y los chequeos de seguridad de Android lint como fatales en el release. Workflows con acciones
+    fijadas por commit, sin credenciales guardadas y de solo lectura salvo el release. Solo TLS 1.3.
+26. **Sin backup ni transferencia de datos de la app:** la lista de servidores tiene sus
+    direcciones y el nombre del certificado de cliente; al cambiar de teléfono se cargan de nuevo.

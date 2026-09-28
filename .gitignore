@@ -1,0 +1,13 @@
+/build
+.gradle
+local.properties
+*.log
+/build
+/app/build
+/.gradle
+/local.properties
+/release.jks
+/rust/target
+/core/build
+/core/src/main/jniLibs
+/core/src/main/kotlin

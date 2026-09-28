@@ -1,0 +1,5 @@
+# Versions from the history (GitVersion 6): the first release is 1.0.0 (`next-version`), then each
+# commit on master is a patch after the last release tag (the releases make the tags);
+# "+semver: minor" or "+semver: major" in a message bumps more.
+workflow: TrunkBased/preview1
+next-version: 1.0.0
