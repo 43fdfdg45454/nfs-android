@@ -85,3 +85,12 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     como máscara (umask) para el núcleo: estándar `022` (644 y 755, por defecto), grupo `002`
     (664 y 775, para carpetas compartidas con setgid), privado `077` (600 y 700) y "otro", una
     máscara en octal con los permisos que resultan a la vista (por ejemplo `027`: 640 y 750).
+28. **Copiar y mover dentro de un servidor, en el servidor** (`copyDocument`, `moveDocument`):
+    mover es un RENAME; copiar, CLONE y si no, COPY en tramos de 64 MiB (carpetas enteras, los
+    enlaces como enlaces). Si el servidor no puede, "no soportado" sin dejar nada, y el gestor de
+    archivos copia por su cuenta; entre servidores, siempre así. Un nombre ocupado en el destino
+    da "nombre (1).ext", nunca se pisa. Hasta 30 min por copia (una llamada, sin progreso).
+29. **Enlaces simbólicos seguidos dentro del export**, como un montaje del kernel: relativos y
+    absolutos bajo la ruta del export en el servidor; hasta 40 saltos. Uno fuera del export o en
+    bucle se lista como el enlace que es y no se abre. Sin enlaces en el camino, una sola llamada.
+30. **La ruta de un documento sale de su id** (`findDocumentPath`), sin llamar al servidor.

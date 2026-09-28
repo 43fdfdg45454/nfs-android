@@ -163,6 +163,13 @@ jobs:
       - name: nfsd and the fixtures
         working-directory: nfs-core
         run: ci/run.sh "nfsd" bash -c "ci/certs.sh > /dev/null 2>&1 && ci/nfsd.sh && ci/fixtures.sh /srv/nfs/fixtures 256"
+      - name: Symbolic links for the provider's tests
+        run: |
+          sudo mkdir -p /srv/nfs/links
+          sudo ln -sfn ../fixtures/movie-a.bin /srv/nfs/links/movie
+          sudo ln -sfn ../fixtures /srv/nfs/links/fixtures
+          sudo ln -sfn ../../outside /srv/nfs/links/outside
+          sudo ln -sfn loop /srv/nfs/links/loop
       - name: KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm.rules

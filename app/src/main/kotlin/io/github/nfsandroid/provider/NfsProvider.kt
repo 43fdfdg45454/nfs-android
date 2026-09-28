@@ -22,12 +22,12 @@ class NfsProvider : DocumentsProvider() {
 
     override fun onCreate() = true
 
-    private fun <T> nfs(id: String, block: suspend (uniffi.nfscore.Mount, String, io.github.nfsandroid.data.Server) -> T): T {
+    private fun <T> nfs(id: String, timeoutMs: Long = CALL_MS, block: suspend (uniffi.nfscore.Mount, String, io.github.nfsandroid.data.Server) -> T): T {
         val (serverId, path) = Documents.parse(id)
         val server = ServerStore.get(serverId) ?: throw FileNotFoundException("no server for $id")
         return try {
             // A server that stopped answering must not hang the app asking (a picker, a file manager).
-            runBlocking { withTimeout(CALL_MS) { block(Mounts.get(server), path, server) } }
+            runBlocking { withTimeout(timeoutMs) { block(Mounts.get(server), path, server) } }
         } catch (e: Exception) {
             // DocumentsProvider turns this into an empty answer: the log is where it shows.
             io.github.nfsandroid.log.NfsLog.line("${server.title}/$path: $e")
@@ -101,6 +101,32 @@ class NfsProvider : DocumentsProvider() {
         Documents.id(Documents.parse(id).first, to)
     }
 
+    /** Made by the server (CLONE or COPY), within one server; else the caller copies by itself. */
+    override fun copyDocument(sourceId: String, targetParentId: String): String {
+        val (server, from) = Documents.parse(sourceId)
+        if (server != Documents.parse(targetParentId).first) throw UnsupportedOperationException("copy across servers")
+        val copied = nfs(targetParentId, COPY_MS) { mount, dir, _ ->
+            val name = Names.free(mount, dir, from.substringAfterLast('/'))
+            name.takeIf { mount.serverCopy(from, Names.join(dir, name)) }
+        } ?: throw UnsupportedOperationException("the server cannot copy $from")
+        changed(targetParentId)
+        return Documents.child(targetParentId, copied)
+    }
+
+    /** A rename into another directory of the same server: instant, whatever its size. */
+    override fun moveDocument(sourceId: String, sourceParentId: String, targetParentId: String): String {
+        val (server, from) = Documents.parse(sourceId)
+        if (server != Documents.parse(targetParentId).first) throw UnsupportedOperationException("move across servers")
+        val moved = nfs(targetParentId) { mount, dir, _ ->
+            Names.free(mount, dir, from.substringAfterLast('/')).also { mount.rename(from, Names.join(dir, it)) }
+        }
+        changed(sourceParentId)
+        changed(targetParentId)
+        return Documents.child(targetParentId, moved)
+    }
+
+    override fun findDocumentPath(parentId: String?, childId: String) = Documents.path(parentId, childId)
+
     override fun isChildDocument(parent: String, id: String) = parent.substringAfter(':').let { p ->
         Documents.parse(id).let { (server, path) -> server == Documents.parse(parent).first && (p.isEmpty() || path.startsWith("$p/")) }
     }
@@ -111,6 +137,8 @@ class NfsProvider : DocumentsProvider() {
 
     companion object {
         private const val CALL_MS = 20_000L
+        /** A server copy of gigabytes by COPY runs at the server's disk speed: one call, no progress. */
+        private const val COPY_MS = 30 * 60_000L
         private val ROOT_COLUMNS = arrayOf(Root.COLUMN_ROOT_ID, Root.COLUMN_DOCUMENT_ID, Root.COLUMN_TITLE, Root.COLUMN_SUMMARY, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
             Root.COLUMN_AVAILABLE_BYTES, Root.COLUMN_CAPACITY_BYTES)
     }

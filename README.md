@@ -52,6 +52,12 @@ every app, and **Browse** opens it in the system's Files app.
 - **Settings**: the local cache for every server (4 GB by default), the notification, about.
 - While a server is connected, a notification shows what the connections are doing; Android needs
   it to let players reach the server from the background.
+- In any file manager, copying or moving within one server is done by the server: a move is a
+  rename (instant, whatever the size) and a copy a clone (instant on XFS or btrfs) or a copy on the
+  server's own disk; nothing crosses the network. A file already in the local cache copies to
+  another server without reading it from the first one again.
+- Symbolic links inside the export are followed (relative ones, and absolute ones under the
+  export's path on the server); a link out of the export shows but does not open.
 
 ## When something goes wrong
 

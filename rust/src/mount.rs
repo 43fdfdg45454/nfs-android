@@ -4,7 +4,7 @@ use crate::files::{ReadFile, WriteFile};
 use crate::identity::Identity;
 use crate::types::{Server, Space, Stat};
 use crate::{Result, other};
-use nfs_client::attr::SetAttrs;
+use nfs_client::attr::{FileType, SetAttrs};
 use nfs_client::{Client, Create, Fh};
 use nfs_engine::Engine;
 use std::sync::Arc;
@@ -12,10 +12,17 @@ use std::sync::Arc;
 #[derive(uniffi::Object)]
 pub struct Mount {
     pub(crate) engine: Arc<Engine>,
+    /// The export's path on the server, for absolute links into it.
+    pub(crate) export: String,
+}
+
+/// `name` in the directory at `path` ("" is the export's root).
+pub(crate) fn join(path: &str, name: &str) -> String {
+    if path.is_empty() { name.to_owned() } else { format!("{path}/{name}") }
 }
 
 /// The parent directory's path and the last name of `path`.
-fn split(path: &str) -> Result<(&str, &str)> {
+pub(crate) fn split(path: &str) -> Result<(&str, &str)> {
     let path = path.trim_end_matches('/');
     let (parent, name) = path.rsplit_once('/').unwrap_or(("", path));
     if name.is_empty() { Err(other("a path with no name")) } else { Ok((parent, name)) }
@@ -37,24 +44,28 @@ impl Mount {
         let cache = server.use_cache.then(|| crate::cache::get(&cache_dir, cache_bytes)).flatten();
         let read_ahead = u64::from(server.read_ahead_mb.clamp(16, 1024)) << 20;
         let config = nfs_engine::Config { read_ahead, cache, ..Default::default() };
-        Ok(Arc::new(Self { engine: Engine::new(client, config) }))
+        Ok(Arc::new(Self { engine: Engine::new(client, config), export: server.export }))
     }
 
     pub async fn stat(&self, path: String) -> Result<Stat> {
-        let (_, attrs) = self.engine.client().lookup(None, &path).await?;
+        let (_, attrs) = self.resolve(&path, true).await?;
         Ok(Stat::new(split(&path).map_or(String::new(), |(_, n)| n.to_owned()), &attrs))
     }
 
     pub async fn list(&self, path: String) -> Result<Vec<Stat>> {
         let dir = self.fh(&path).await?;
-        Ok(self
-            .engine
-            .client()
-            .readdir(&dir)
-            .await?
-            .iter()
-            .map(|e| Stat::new(e.name.clone(), &e.attrs))
-            .collect())
+        let mut stats = Vec::new();
+        for entry in self.engine.client().readdir(&dir).await? {
+            // A link shows as what it points to; one out of reach, as the link it is.
+            let attrs = match entry.attrs.kind {
+                FileType::Symlink => {
+                    self.resolve(&join(&path, &entry.name), true).await.map(|(_, a)| a)
+                }
+                _ => Err(crate::other("not a link")),
+            };
+            stats.push(Stat::new(entry.name.clone(), attrs.as_ref().unwrap_or(&entry.attrs)));
+        }
+        Ok(stats)
     }
 
     pub async fn mkdir(&self, path: String) -> Result<Stat> {
@@ -124,10 +135,10 @@ impl Mount {
 }
 
 impl Mount {
-    async fn fh(&self, path: &str) -> Result<Fh> {
+    pub(crate) async fn fh(&self, path: &str) -> Result<Fh> {
         if path.trim_matches('/').is_empty() {
             return Ok(self.engine.client().root().clone());
         }
-        Ok(self.engine.client().lookup(None, path).await?.0)
+        Ok(self.resolve(path, true).await?.0)
     }
 }

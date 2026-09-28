@@ -38,6 +38,12 @@ object Provider {
     /** A document by its path under the export. */
     fun find(path: String): String = path.split('/').fold(ROOT) { id, name -> children(id)[name] ?: why("finding $path") }
 
+    /** A document and, if a directory, all it holds. */
+    fun removeTree(id: String) {
+        runCatching { children(id) }.getOrDefault(emptyMap()).values.forEach(::removeTree)
+        DocumentsContract.deleteDocument(resolver, uri(id))
+    }
+
     /** A new file at the root with [data]; its document id. */
     fun create(name: String, data: ByteArray): Uri {
         children(ROOT)[name]?.let { DocumentsContract.deleteDocument(resolver, uri(it)) }

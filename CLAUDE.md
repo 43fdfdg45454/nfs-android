@@ -46,8 +46,10 @@ etapa 2 está estable.
   emulador (API 34) contra nfsd del runner con los scripts y fixtures de nfs-core. Las pruebas usan
   el provider por `ContentResolver` como otra app: lo básico (`ProviderTest`), los escenarios del
   motor por el proxy de archivos con el reproductor estricto (`ScenariosTest`, tiempos informados)
-  modos de apertura, miniaturas y caché (`ModesTest`) y avisos de cambios de otro cliente
-  (`WatchTest`). Resultados por logcat (`nfs-test`) a una anotación.
+  modos de apertura, miniaturas y caché (`ModesTest`), avisos de cambios de otro cliente
+  (`WatchTest`), copiar y mover en el servidor sin tráfico (`TransfersTest`) y enlaces simbólicos
+  y rutas (`LinksTest`, con los enlaces que la CI crea en `links/`). Resultados por logcat
+  (`nfs-test`) a una anotación.
 - Seguridad (`security.yml`, en cada push y a diario): `cargo deny` sobre `rust/`, secretos en el
   historial (`ci/secrets.sh`), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions); los
   chequeos de seguridad de Android lint son fatales en el release. Acciones fijadas por commit.

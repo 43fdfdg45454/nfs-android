@@ -3,8 +3,10 @@
 
 mod cache;
 mod config;
+mod copy;
 mod files;
 mod identity;
+mod links;
 mod mount;
 mod stats;
 mod types;
