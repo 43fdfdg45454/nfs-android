@@ -76,7 +76,11 @@
     <string name="umask_standard">Estándar</string>
     <string name="umask_group">Grupo</string>
     <string name="umask_private">Privado</string>
-    <string name="umask_help">Estándar: vos escribís y los demás leen (archivos 644, carpetas 755). Grupo: tu grupo también escribe (664, 775), para carpetas compartidas. Privado: solo vos (600, 700).</string>
+    <string name="umask_other">Otro</string>
+    <string name="umask_mask">Máscara (umask, en octal)</string>
+    <string name="umask_result">Archivos %1$s, carpetas %2$s</string>
+    <string name="umask_invalid">Dígitos octales, hasta 777</string>
+    <string name="umask_help">Estándar: vos escribís y los demás leen (archivos 644, carpetas 755). Grupo: tu grupo también escribe (664, 775), para carpetas compartidas. Privado: solo vos (600, 700). Otro: cualquier máscara, como 027 (640, 750).</string>
     <string name="gids_help">Números de grupos que también te dan acceso, separados por comas.</string>
     <string name="section_performance">Rendimiento</string>
     <string name="section_performance_help">Los valores por defecto sirven para la mayoría de los enlaces</string>

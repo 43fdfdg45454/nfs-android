@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -16,7 +14,6 @@ import io.github.nfsandroid.data.Server
 import io.github.nfsandroid.ui.common.Help
 import io.github.nfsandroid.ui.common.NumberInput
 import io.github.nfsandroid.ui.common.Section
-import io.github.nfsandroid.ui.common.Segmented
 import io.github.nfsandroid.ui.common.TextInput
 
 /** Who the phone is to the server (AUTH_SYS): the numbers its permissions apply to. */
@@ -31,12 +28,5 @@ fun IdentitySection(s: Server, onChange: (Server) -> Unit) =
         TextInput(stringResource(R.string.gids), s.gids.joinToString(", "), help = stringResource(R.string.gids_help), placeholder = "100, 1001") { v ->
             onChange(s.copy(gids = v.split(',', ' ').mapNotNull { it.trim().toIntOrNull() }))
         }
-        Text(stringResource(R.string.umask), style = MaterialTheme.typography.bodyLarge)
-        val options = listOf(
-            Server.UMASK_STANDARD to stringResource(R.string.umask_standard),
-            Server.UMASK_GROUP to stringResource(R.string.umask_group),
-            Server.UMASK_PRIVATE to stringResource(R.string.umask_private),
-        )
-        Segmented(options, s.umask) { onChange(s.copy(umask = it)) }
-        Help(stringResource(R.string.umask_help))
+        Permissions(s.umask) { onChange(s.copy(umask = it)) }
     }

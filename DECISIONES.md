@@ -83,4 +83,5 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     direcciones y el nombre del certificado de cliente; al cambiar de teléfono se cargan de nuevo.
 27. **Permisos de lo que se crea, por servidor** (Identidad): tres opciones en vez de un número,
     como máscara (umask) para el núcleo: estándar `022` (644 y 755, por defecto), grupo `002`
-    (664 y 775, para carpetas compartidas con setgid) y privado `077` (600 y 700).
+    (664 y 775, para carpetas compartidas con setgid), privado `077` (600 y 700) y "otro", una
+    máscara en octal con los permisos que resultan a la vista (por ejemplo `027`: 640 y 750).

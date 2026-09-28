@@ -36,8 +36,8 @@ Tap **Add server**. Each section of the form explains its options:
   `.p12` installed in Settings › Security › Encryption & credentials › Install a certificate; its
   key never leaves Android's key store. The gateway always asks for one.
 - **Identity**: the UID/GID your files belong to on the server (with `all_squash` it does not
-  matter), and the permissions of what you create: standard (644, folders 755), group (664, 775)
-  or private (600, 700).
+  matter), and the permissions of what you create: standard (644, folders 755), group (664, 775),
+  private (600, 700) or any umask.
 - **Performance**: connections, read-ahead (256 MB by default) and the local cache.
 
 **Test the connection** tries it before saving. Then the server shows up in the file picker of

@@ -77,7 +77,11 @@
     <string name="umask_standard">Standard</string>
     <string name="umask_group">Group</string>
     <string name="umask_private">Private</string>
-    <string name="umask_help">Standard: you write, others read (files 644, folders 755). Group: your group writes too (664, 775), for shared folders. Private: only you (600, 700).</string>
+    <string name="umask_other">Other</string>
+    <string name="umask_mask">Mask (umask, octal)</string>
+    <string name="umask_result">Files %1$s, folders %2$s</string>
+    <string name="umask_invalid">Octal digits, up to 777</string>
+    <string name="umask_help">Standard: you write, others read (files 644, folders 755). Group: your group writes too (664, 775), for shared folders. Private: only you (600, 700). Other: any mask, such as 027 (640, 750).</string>
     <string name="gids_help">Group numbers that also give you access, separated by commas.</string>
     <string name="section_performance">Performance</string>
     <string name="section_performance_help">The defaults suit most links</string>
