@@ -34,6 +34,16 @@ object Proxies {
         writing.values.filter { it.first == document }.forEach { it.second.await(3, TimeUnit.SECONDS) }
     }
 
+    /** Marks [document] as being written, until the function returned is called. */
+    fun writer(document: String): () -> Unit {
+        val (token, done) = Any() to CountDownLatch(1)
+        writing[token] = document to done
+        return {
+            writing.remove(token)
+            done.countDown()
+        }
+    }
+
     private fun io(what: String, block: () -> Int): Int = try {
         block()
     } catch (e: Exception) {
@@ -71,11 +81,11 @@ object Proxies {
      * included). fsync puts what was written on the server's stable storage.
      */
     fun write(storage: StorageManager, document: String, name: String, file: WriteFile, size: Long = 0, readable: Boolean = false): ParcelFileDescriptor {
-        val (thread, token, done) = Triple(thread(name), Any(), CountDownLatch(1))
-        writing[token] = document to done
+        val (thread, done) = thread(name) to writer(document)
         val callback = object : ProxyFileDescriptorCallback() {
             private var end = size
             private val gather = Gather(file)
+            private val upload = Upload(name, "writes through the file proxy")
 
             override fun onGetSize() = end
 
@@ -92,6 +102,7 @@ object Proxies {
                 end = maxOf(end, offset + count)
                 ProxyStats.Writes.calls.incrementAndGet()
                 ProxyStats.Writes.nanos.addAndGet(System.nanoTime() - begin)
+                upload.piece(count, System.nanoTime() - begin)
                 count
             }
 
@@ -101,9 +112,9 @@ object Proxies {
 
             override fun onRelease() {
                 runCatching { gather.flush(); runBlocking { file.finish() } }.onFailure { NfsLog.line("closing $name: ${it.message}") }
+                upload.done()
                 file.close()
-                writing.remove(token)
-                done.countDown()
+                done()
                 thread.quitSafely()
             }
         }

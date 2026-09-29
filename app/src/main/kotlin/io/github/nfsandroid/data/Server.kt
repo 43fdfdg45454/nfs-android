@@ -38,6 +38,8 @@ data class Server(
     val serverCopies: Boolean = true,
     /** Minutes unused before the connection closes; 0: never (while the app runs). */
     val disconnectMinutes: Int = 5,
+    /** Files written whole through a pipe, not the file proxy: "managers" (file managers), "always", "never". */
+    val pipeWrites: String = "managers",
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("name", name); put("host", host); put("port", port); put("export", export)
@@ -46,7 +48,7 @@ data class Server(
         put("gids", JSONArray(gids)); put("umask", umask); put("connections", connections); put("readAheadMb", readAheadMb)
         put("useCache", useCache); put("readOnly", readOnly); put("enabled", enabled)
         put("networkKind", networkKind); put("networkSubnet", networkSubnet); put("followParentLinks", followParentLinks)
-        put("serverCopies", serverCopies); put("disconnectMinutes", disconnectMinutes)
+        put("serverCopies", serverCopies); put("disconnectMinutes", disconnectMinutes); put("pipeWrites", pipeWrites)
     }
 
     val title get() = name.ifBlank { host }
@@ -74,6 +76,7 @@ data class Server(
             networkKind = o.optString("networkKind", "any"), networkSubnet = o.optString("networkSubnet"),
             followParentLinks = o.optBoolean("followParentLinks"),
             serverCopies = o.optBoolean("serverCopies", true), disconnectMinutes = o.optInt("disconnectMinutes", 5),
+            pipeWrites = o.optString("pipeWrites", "managers"),
         ).let { server ->
             // Before, QUIC servers kept the gateway (host:port) apart from nfsd's host and port.
             val gateway = o.optString("gateway").takeIf { server.transport == "quic" && it.isNotBlank() } ?: return@let server

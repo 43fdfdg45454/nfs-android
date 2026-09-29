@@ -51,7 +51,7 @@ etapa 2 está estable.
   y rutas (`LinksTest`), seguridad de los enlaces (`LinkEscapesTest`: nada fuera del export ni en
   bucle; `LinkRightsTest`: permisos como por la ruta real con un usuario común, borrar o copiar un
   enlace conserva su destino; árboles de `ci/links.sh`) y subidas con escrituras de 8 KiB y 1 MiB
-  (`UploadTest`, velocidades informadas). Resultados por logcat (`nfs-test`) a una anotación.
+  por el proxy y por un tubo (`UploadTest`, velocidades informadas). Resultados por logcat (`nfs-test`) a una anotación.
 - Seguridad (`security.yml`, en cada push y a diario): `cargo deny` sobre `rust/`, secretos en el
   historial (`ci/secrets.sh`), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions); los
   chequeos de seguridad de Android lint son fatales en el release. Acciones fijadas por commit.

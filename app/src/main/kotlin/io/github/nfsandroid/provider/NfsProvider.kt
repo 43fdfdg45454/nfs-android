@@ -3,6 +3,7 @@ package io.github.nfsandroid.provider
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.system.Os
 import android.system.OsConstants
@@ -60,14 +61,21 @@ class NfsProvider : DocumentsProvider() {
             setNotificationUri(context!!.contentResolver, DocumentsContract.buildChildDocumentsUri(authority, parent))
         }
 
-    override fun openDocument(id: String, mode: String, signal: CancellationSignal?) = nfs(id) { mount, path, _ ->
+    override fun openDocument(id: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor {
+        val caller = callingPackage
+        return open(id, mode, caller)
+    }
+
+    private fun open(id: String, mode: String, caller: String?) = nfs(id) { mount, path, server ->
         val storage = context!!.getSystemService(StorageManager::class.java)
         val truncate = 't' in mode
         // Whatever the mode, a writer this document still has finishes first (close-to-open).
         Proxies.awaitWriters(id)
         when (mode) {
             "r" -> Proxies.read(storage, path, mount.read(path))
-            "w", "wt" -> Proxies.write(storage, id, path, mount.create(path, exclusive = false))
+            "w", "wt" -> mount.create(path, exclusive = false).let { file ->
+                if (Pipes.suit(server, caller)) Pipes.write(id, path, file) else Proxies.write(storage, id, path, file)
+            }
             // In place: "rw" reads and writes, "rwt" empties it first, "wa" appends (the
             // descriptor starts at the end: the proxy does not know O_APPEND).
             else -> {

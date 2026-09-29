@@ -91,6 +91,11 @@
     <string name="disconnect_after">Desconectar sin uso</string>
     <string name="disconnect_after_help">Más tiempo: volver a abrir algo no espera la reconexión. Menos: menos batería, y la notificación se va antes. Nunca: conectado hasta que se apague el servidor.</string>
     <string name="disconnect_never">Nunca</string>
+    <string name="pipe_writes">Escritura directa</string>
+    <string name="pipe_managers">Gestores de archivos</string>
+    <string name="pipe_always">Siempre</string>
+    <string name="pipe_never">Nunca</string>
+    <string name="pipe_writes_help">Los archivos que se escriben enteros van por un tubo, no por el proxy de archivos de Android: subidas varias veces más rápidas. Un tubo no permite moverse ni sincronizar: las apps que lo hacen (las que graban video) fallan con él. Por defecto, solo para gestores de archivos.</string>
     <string name="section_performance">Rendimiento</string>
     <string name="section_performance_help">Los valores por defecto sirven para la mayoría de los enlaces</string>
     <string name="connections">Conexiones</string>

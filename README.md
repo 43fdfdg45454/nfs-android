@@ -42,7 +42,10 @@ Tap **Add server**. Each section of the form explains its options:
 - **Advanced**: edge cases, with sensible defaults. Following symbolic links to their own folder
   or one above it (off: apps that go through whole folders would loop through them); copies made
   by the server (on; off, the file manager copies through the phone, with progress); disconnecting
-  when unused (after 5 minutes; 1, 15, 60 or never).
+  when unused (after 5 minutes; 1, 15, 60 or never); direct writing (a file written whole goes
+  through a pipe instead of Android's file proxy, which costs about a millisecond per write: file
+  managers only by default, since apps that seek while writing, such as video recorders, fail with
+  a pipe).
 
 **Test the connection** tries it before saving. Then the server shows up in the file picker of
 every app, and **Browse** opens it in the system's Files app.
@@ -72,6 +75,8 @@ every app, and **Browse** opens it in the system's Files app.
 - `Android/data/io.github.nfsandroid/files/nfs-log.txt` has every connection, network change and
   error; `crash-log.txt` next to it, any crash. Both are what to attach to an issue (they contain
   your servers' names: look before posting).
+- Each upload leaves a line in `nfs-log.txt`: its speed, the writes it came in, and how long
+  was spent inside the app (the rest is the app writing and Android's file proxy).
 - Some file managers do not show the free space of storages added through the system picker; the
   system's Files app and this app's cards do.
 
