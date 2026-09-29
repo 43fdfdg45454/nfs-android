@@ -19,11 +19,11 @@ import kotlinx.coroutines.sync.withLock
 import uniffi.nfscore.Mount
 
 /**
- * One mount per server, connected on first use and closed after 5 minutes unused. While any is
+ * One mount per server, connected on first use and closed after its minutes unused (5 by default,
+ * or never: the server's Advanced settings). While any is
  * connected, the foreground service keeps the app's network allowed in the background.
  */
 object Mounts {
-    private const val IDLE_MS = 5 * 60_000L
     /** Nobody there shows in 4 s (the core's reach timeout); a slow link that answers gets this long. */
     private const val CONNECT_MS = 15_000L
     private val lock = Mutex()
@@ -120,7 +120,8 @@ object Mounts {
     private suspend fun closeIdle() = lock.withLock {
         val now = System.currentTimeMillis()
         mounts.entries.removeAll { (id, entry) ->
-            (now - entry.second > IDLE_MS).also { idle -> if (idle) entry.first.disconnect().also { NfsLog.line("$id: idle, closed") } }
+            val minutes = ServerStore.get(id)?.disconnectMinutes ?: 5
+            (minutes > 0 && now - entry.second > minutes * 60_000L).also { idle -> if (idle) entry.first.disconnect().also { NfsLog.line("$id: idle, closed") } }
         }
         after()
     }

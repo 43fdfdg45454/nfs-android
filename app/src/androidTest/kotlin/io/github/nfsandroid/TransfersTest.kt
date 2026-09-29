@@ -4,7 +4,11 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.nfsandroid.data.Server
+import io.github.nfsandroid.data.ServerStore
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,5 +47,13 @@ class TransfersTest {
         check(moved)
         check(Provider.uri(inTree))
         listOf(dir, tree).forEach { Provider.removeTree(DocumentsContract.getDocumentId(it)) }
+    }
+
+    @Test
+    fun withServerCopiesOffTheFileManagerCopies() {
+        ServerStore.put(Server(id = "ci-nocopy", name = "No copies", host = Provider.host, export = "/", serverCopies = false))
+        val movie = Provider.uri("ci-nocopy:fixtures/movie-a.bin")
+        assertNull(runCatching { DocumentsContract.copyDocument(Provider.resolver, movie, Provider.uri("ci-nocopy:")) }.getOrNull())
+        assertFalse("movie-a.bin" in Provider.listing("ci-nocopy:")!!)
     }
 }

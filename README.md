@@ -39,9 +39,10 @@ Tap **Add server**. Each section of the form explains its options:
   matter), and the permissions of what you create: standard (644, folders 755), group (664, 775),
   private (600, 700) or any umask.
 - **Performance**: connections, read-ahead (256 MB by default) and the local cache.
-- **Advanced**: edge cases, off by default. Following symbolic links to their own folder or one
-  above it: they open as folders, but apps that go through whole folders (copying, deleting,
-  gallery indexing) then loop through them.
+- **Advanced**: edge cases, with sensible defaults. Following symbolic links to their own folder
+  or one above it (off: apps that go through whole folders would loop through them); copies made
+  by the server (on; off, the file manager copies through the phone, with progress); disconnecting
+  when unused (after 5 minutes; 1, 15, 60 or never).
 
 **Test the connection** tries it before saving. Then the server shows up in the file picker of
 every app, and **Browse** opens it in the system's Files app.

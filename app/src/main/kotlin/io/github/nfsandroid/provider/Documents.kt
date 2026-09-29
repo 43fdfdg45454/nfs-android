@@ -12,8 +12,7 @@ import uniffi.nfscore.Stat
 /** Document ids ("server id:path under the export") and the rows describing documents. */
 object Documents {
     /** What a writable server's files and directories allow besides their own flags. */
-    private const val EDIT = Document.FLAG_SUPPORTS_DELETE or Document.FLAG_SUPPORTS_RENAME or
-        Document.FLAG_SUPPORTS_COPY or Document.FLAG_SUPPORTS_MOVE
+    private const val EDIT = Document.FLAG_SUPPORTS_DELETE or Document.FLAG_SUPPORTS_RENAME or Document.FLAG_SUPPORTS_MOVE
 
     val COLUMNS = arrayOf(
         Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME, Document.COLUMN_MIME_TYPE,
@@ -44,10 +43,11 @@ object Documents {
 
     fun row(cursor: MatrixCursor, id: String, stat: Stat, server: Server, name: String = stat.name) {
         val directory = stat.kind == Kind.DIRECTORY
+        val copy = if (server.serverCopies) Document.FLAG_SUPPORTS_COPY else 0
         val flags = when {
             server.readOnly -> 0
-            directory -> Document.FLAG_DIR_SUPPORTS_CREATE or EDIT
-            else -> Document.FLAG_SUPPORTS_WRITE or EDIT
+            directory -> Document.FLAG_DIR_SUPPORTS_CREATE or EDIT or copy
+            else -> Document.FLAG_SUPPORTS_WRITE or EDIT or copy
         }
         val mime = mime(stat)
         val thumbnail = if (Thumbnails.supported(mime)) Document.FLAG_SUPPORTS_THUMBNAIL else 0

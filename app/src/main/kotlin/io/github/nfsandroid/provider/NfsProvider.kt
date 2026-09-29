@@ -105,6 +105,7 @@ class NfsProvider : DocumentsProvider() {
     override fun copyDocument(sourceId: String, targetParentId: String): String {
         val (server, from) = Documents.parse(sourceId)
         if (server != Documents.parse(targetParentId).first) throw UnsupportedOperationException("copy across servers")
+        if (ServerStore.get(server)?.serverCopies == false) throw UnsupportedOperationException("server copies are off")
         val copied = nfs(targetParentId, COPY_MS) { mount, dir, _ ->
             val name = Names.free(mount, dir, from.substringAfterLast('/'))
             name.takeIf { mount.serverCopy(from, Names.join(dir, name)) }

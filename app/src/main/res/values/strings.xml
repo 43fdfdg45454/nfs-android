@@ -87,6 +87,11 @@
     <string name="section_advanced_help">Edge cases, off by default: turn one on only if you need it</string>
     <string name="follow_parent_links">Follow links to folders above</string>
     <string name="follow_parent_links_help">Symbolic links to their own folder or one above it open as folders. Apps that go through whole folders (copying, deleting, galleries indexing) loop through them up to 40 levels deep.</string>
+    <string name="server_copies">Copies on the server</string>
+    <string name="server_copies_help">Copies within this server are made by the server: instant on XFS or btrfs, nothing through the network, but with no progress. Off, the file manager copies through the phone, with progress.</string>
+    <string name="disconnect_after">Disconnect when unused</string>
+    <string name="disconnect_after_help">Longer: opening something again does not wait to reconnect. Shorter: less battery, and the notification goes sooner. Never: connected until the server is turned off.</string>
+    <string name="disconnect_never">Never</string>
     <string name="section_performance">Performance</string>
     <string name="section_performance_help">The defaults suit most links</string>
     <string name="connections">Connections</string>

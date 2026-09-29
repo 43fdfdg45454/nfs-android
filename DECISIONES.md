@@ -17,7 +17,8 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
 5. **Certificado de cliente:** se elige con `KeyChain.choosePrivateKeyAlias`. La clave no sale de
    KeyChain: cada firma del handshake se hace en Kotlin (`KeyChainIdentity`). El mismo certificado
    sirve para el QUIC exterior del gateway y para el mTLS del export.
-6. **Un montaje por servidor**, conectado al primer uso y cerrado a los 5 minutos sin uso. El
+6. **Un montaje por servidor**, conectado al primer uso y cerrado sin uso a los 5 minutos (o lo
+   que diga Avanzados). El
    servicio en primer plano (`specialUse`) corre mientras haya alguno.
 7. **Owner del cliente NFS:** id de instalación (UUID guardado) + id del servidor.
 8. **Un hilo por descriptor abierto** en el proxy de archivos: dos reproductores no se esperan.
@@ -99,7 +100,9 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
 31. **Escrituras consecutivas juntadas en 1 MiB** antes del núcleo (`Gather`): los gestores de
     archivos escriben de a 8 KiB y cada llamada al núcleo cuesta más que eso. Se vuelcan antes de
     leer, de un fsync, de escribir en otro lugar y al cerrar; un error aparece en esa llamada.
-32. **Sección "Avanzados"** por servidor: casos borde apagados por defecto. El primero, seguir los
-    enlaces a su propia carpeta o a una de más arriba (bucles para lo que recorre carpetas).
+32. **Sección "Avanzados"** por servidor: casos borde con lo sensato por defecto. Seguir los
+    enlaces a su propia carpeta o a una de más arriba (apagado: bucles para lo que recorre
+    carpetas); copias en el servidor (encendido; apagado, el gestor copia con progreso); desconectar
+    sin uso a los 1, 5 (por defecto), 15 o 60 minutos, o nunca.
 33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
     comparando las carpetas reales del camino (los handles), no los nombres.

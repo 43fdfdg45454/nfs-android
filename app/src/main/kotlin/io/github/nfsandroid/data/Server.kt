@@ -34,6 +34,10 @@ data class Server(
     val networkSubnet: String = "",
     /** Links to their own folder or one above it followed: loops for whatever walks folders. */
     val followParentLinks: Boolean = false,
+    /** Copies within the server made by it (CLONE, COPY); off, the file manager copies, with progress. */
+    val serverCopies: Boolean = true,
+    /** Minutes unused before the connection closes; 0: never (while the app runs). */
+    val disconnectMinutes: Int = 5,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("name", name); put("host", host); put("port", port); put("export", export)
@@ -42,6 +46,7 @@ data class Server(
         put("gids", JSONArray(gids)); put("umask", umask); put("connections", connections); put("readAheadMb", readAheadMb)
         put("useCache", useCache); put("readOnly", readOnly); put("enabled", enabled)
         put("networkKind", networkKind); put("networkSubnet", networkSubnet); put("followParentLinks", followParentLinks)
+        put("serverCopies", serverCopies); put("disconnectMinutes", disconnectMinutes)
     }
 
     val title get() = name.ifBlank { host }
@@ -68,6 +73,7 @@ data class Server(
             enabled = o.optBoolean("enabled", true),
             networkKind = o.optString("networkKind", "any"), networkSubnet = o.optString("networkSubnet"),
             followParentLinks = o.optBoolean("followParentLinks"),
+            serverCopies = o.optBoolean("serverCopies", true), disconnectMinutes = o.optInt("disconnectMinutes", 5),
         ).let { server ->
             // Before, QUIC servers kept the gateway (host:port) apart from nfsd's host and port.
             val gateway = o.optString("gateway").takeIf { server.transport == "quic" && it.isNotBlank() } ?: return@let server

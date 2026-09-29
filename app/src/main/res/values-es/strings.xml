@@ -86,6 +86,11 @@
     <string name="section_advanced_help">Casos borde, apagados por defecto: activá uno solo si lo necesitás</string>
     <string name="follow_parent_links">Seguir enlaces a carpetas superiores</string>
     <string name="follow_parent_links_help">Los enlaces simbólicos a su propia carpeta o a una de más arriba se abren como carpetas. Las apps que recorren carpetas enteras (copiar, borrar, galerías que indexan) entran en ellos hasta 40 niveles de profundidad.</string>
+    <string name="server_copies">Copias en el servidor</string>
+    <string name="server_copies_help">Las copias dentro de este servidor las hace el servidor: instantáneas en XFS o btrfs, sin pasar por la red, pero sin progreso. Apagado, el gestor de archivos copia a través del teléfono, con progreso.</string>
+    <string name="disconnect_after">Desconectar sin uso</string>
+    <string name="disconnect_after_help">Más tiempo: volver a abrir algo no espera la reconexión. Menos: menos batería, y la notificación se va antes. Nunca: conectado hasta que se apague el servidor.</string>
+    <string name="disconnect_never">Nunca</string>
     <string name="section_performance">Rendimiento</string>
     <string name="section_performance_help">Los valores por defecto sirven para la mayoría de los enlaces</string>
     <string name="connections">Conexiones</string>
