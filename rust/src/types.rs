@@ -29,6 +29,8 @@ pub struct Server {
     pub gids: Vec<u32>,
     /// Permissions new files (0666) and directories (0777) do not get, as a umask.
     pub umask: u32,
+    /// Links to their own directory or one above it followed: loops for whatever walks folders.
+    pub follow_parent_links: bool,
     /// Stable per installation and server: two clients with one owner would each look like the
     /// other restarting to the server.
     pub owner: String,

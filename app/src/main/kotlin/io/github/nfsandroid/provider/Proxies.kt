@@ -41,20 +41,6 @@ object Proxies {
         throw ErrnoException(what, OsConstants.EIO)
     }
 
-    /** Reads served, for diagnosis: calls, bytes, and nanoseconds in the core and in all. */
-    object ReadStats {
-        val calls = java.util.concurrent.atomic.AtomicLong()
-        val bytes = java.util.concurrent.atomic.AtomicLong()
-        val coreNanos = java.util.concurrent.atomic.AtomicLong()
-        val totalNanos = java.util.concurrent.atomic.AtomicLong()
-        fun reset() = listOf(calls, bytes, coreNanos, totalNanos).forEach { it.set(0) }
-        override fun toString(): String {
-            val n = maxOf(calls.get(), 1)
-            return "${calls.get()} reads of ${bytes.get() / n / 1024} KiB, ${coreNanos.get() / n / 1000} µs in the core, " +
-                "${totalNanos.get() / n / 1000} µs in all"
-        }
-    }
-
     fun read(storage: StorageManager, name: String, file: ReadFile): ParcelFileDescriptor {
         val thread = thread(name)
         val callback = object : ProxyFileDescriptorCallback() {
@@ -65,10 +51,10 @@ object Proxies {
                 val bytes = file.readBlocking(offset.toULong(), size.toUInt())
                 val core = System.nanoTime()
                 bytes.copyInto(data)
-                ReadStats.calls.incrementAndGet()
-                ReadStats.bytes.addAndGet(bytes.size.toLong())
-                ReadStats.coreNanos.addAndGet(core - start)
-                ReadStats.totalNanos.addAndGet(System.nanoTime() - start)
+                ProxyStats.Reads.calls.incrementAndGet()
+                ProxyStats.Reads.bytes.addAndGet(bytes.size.toLong())
+                ProxyStats.Reads.coreNanos.addAndGet(core - start)
+                ProxyStats.Reads.totalNanos.addAndGet(System.nanoTime() - start)
                 bytes.size
             }
 
@@ -89,27 +75,32 @@ object Proxies {
         writing[token] = document to done
         val callback = object : ProxyFileDescriptorCallback() {
             private var end = size
+            private val gather = Gather(file)
 
             override fun onGetSize() = end
 
             override fun onRead(offset: Long, count: Int, data: ByteArray) = io("read $name") {
+                gather.flush()
                 val bytes = file.readBlocking(offset.toULong(), count.toUInt())
                 bytes.copyInto(data)
                 bytes.size
             }
 
             override fun onWrite(offset: Long, count: Int, data: ByteArray) = io("write $name") {
-                file.writeBlocking(offset.toULong(), data.copyOf(count))
+                val begin = System.nanoTime()
+                gather.write(offset, count, data)
                 end = maxOf(end, offset + count)
+                ProxyStats.Writes.calls.incrementAndGet()
+                ProxyStats.Writes.nanos.addAndGet(System.nanoTime() - begin)
                 count
             }
 
             override fun onFsync() {
-                io("sync $name") { runBlocking { file.sync() }; 0 }
+                io("sync $name") { gather.flush(); runBlocking { file.sync() }; 0 }
             }
 
             override fun onRelease() {
-                runCatching { runBlocking { file.finish() } }.onFailure { NfsLog.line("closing $name: ${it.message}") }
+                runCatching { gather.flush(); runBlocking { file.finish() } }.onFailure { NfsLog.line("closing $name: ${it.message}") }
                 file.close()
                 writing.remove(token)
                 done.countDown()

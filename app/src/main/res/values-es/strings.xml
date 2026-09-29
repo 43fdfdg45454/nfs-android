@@ -82,6 +82,10 @@
     <string name="umask_invalid">Dígitos octales, hasta 777</string>
     <string name="umask_help">Estándar: vos escribís y los demás leen (archivos 644, carpetas 755). Grupo: tu grupo también escribe (664, 775), para carpetas compartidas. Privado: solo vos (600, 700). Otro: cualquier máscara, como 027 (640, 750).</string>
     <string name="gids_help">Números de grupos que también te dan acceso, separados por comas.</string>
+    <string name="section_advanced">Avanzados</string>
+    <string name="section_advanced_help">Casos borde, apagados por defecto: activá uno solo si lo necesitás</string>
+    <string name="follow_parent_links">Seguir enlaces a carpetas superiores</string>
+    <string name="follow_parent_links_help">Los enlaces simbólicos a su propia carpeta o a una de más arriba se abren como carpetas. Las apps que recorren carpetas enteras (copiar, borrar, galerías que indexan) entran en ellos hasta 40 niveles de profundidad.</string>
     <string name="section_performance">Rendimiento</string>
     <string name="section_performance_help">Los valores por defecto sirven para la mayoría de los enlaces</string>
     <string name="connections">Conexiones</string>

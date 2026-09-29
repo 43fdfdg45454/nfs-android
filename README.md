@@ -39,6 +39,9 @@ Tap **Add server**. Each section of the form explains its options:
   matter), and the permissions of what you create: standard (644, folders 755), group (664, 775),
   private (600, 700) or any umask.
 - **Performance**: connections, read-ahead (256 MB by default) and the local cache.
+- **Advanced**: edge cases, off by default. Following symbolic links to their own folder or one
+  above it: they open as folders, but apps that go through whole folders (copying, deleting,
+  gallery indexing) then loop through them.
 
 **Test the connection** tries it before saving. Then the server shows up in the file picker of
 every app, and **Browse** opens it in the system's Files app.
@@ -57,7 +60,9 @@ every app, and **Browse** opens it in the system's Files app.
   server's own disk; nothing crosses the network. A file already in the local cache copies to
   another server without reading it from the first one again.
 - Symbolic links inside the export are followed (relative ones, and absolute ones under the
-  export's path on the server); a link out of the export shows but does not open.
+  export's path on the server); a link out of the export, in a loop or to a folder above it shows
+  but does not open. A link grants nothing its target's permissions do not: CI checks escapes,
+  loops, chains and permissions with a plain user.
 
 ## When something goes wrong
 

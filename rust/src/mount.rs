@@ -14,6 +14,8 @@ pub struct Mount {
     pub(crate) engine: Arc<Engine>,
     /// The export's path on the server, for absolute links into it.
     pub(crate) export: String,
+    /// Links to their own directory or one above it followed (loops for whatever walks folders).
+    pub(crate) follow_up: bool,
 }
 
 /// `name` in the directory at `path` ("" is the export's root).
@@ -44,7 +46,11 @@ impl Mount {
         let cache = server.use_cache.then(|| crate::cache::get(&cache_dir, cache_bytes)).flatten();
         let read_ahead = u64::from(server.read_ahead_mb.clamp(16, 1024)) << 20;
         let config = nfs_engine::Config { read_ahead, cache, ..Default::default() };
-        Ok(Arc::new(Self { engine: Engine::new(client, config), export: server.export }))
+        Ok(Arc::new(Self {
+            engine: Engine::new(client, config),
+            export: server.export,
+            follow_up: server.follow_parent_links,
+        }))
     }
 
     pub async fn stat(&self, path: String) -> Result<Stat> {

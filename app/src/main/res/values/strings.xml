@@ -83,6 +83,10 @@
     <string name="umask_invalid">Octal digits, up to 777</string>
     <string name="umask_help">Standard: you write, others read (files 644, folders 755). Group: your group writes too (664, 775), for shared folders. Private: only you (600, 700). Other: any mask, such as 027 (640, 750).</string>
     <string name="gids_help">Group numbers that also give you access, separated by commas.</string>
+    <string name="section_advanced">Advanced</string>
+    <string name="section_advanced_help">Edge cases, off by default: turn one on only if you need it</string>
+    <string name="follow_parent_links">Follow links to folders above</string>
+    <string name="follow_parent_links_help">Symbolic links to their own folder or one above it open as folders. Apps that go through whole folders (copying, deleting, galleries indexing) loop through them up to 40 levels deep.</string>
     <string name="section_performance">Performance</string>
     <string name="section_performance_help">The defaults suit most links</string>
     <string name="connections">Connections</string>

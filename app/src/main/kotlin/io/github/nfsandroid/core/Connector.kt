@@ -16,7 +16,7 @@ object Connector {
             transport = if (server.transport == "quic") Transport.QUIC else Transport.TCP,
             security = when (server.security) { "tls" -> Security.TLS; "mtls" -> Security.MUTUAL_TLS; else -> Security.NONE },
             uid = server.uid.toUInt(), gid = server.gid.toUInt(), gids = server.gids.map { it.toUInt() },
-            umask = server.umask.toUInt(),
+            umask = server.umask.toUInt(), followParentLinks = server.followParentLinks,
             owner = "${installation(context)}-${server.id}", connections = server.connections.toUInt(),
             readAheadMb = server.readAheadMb.toUInt(), useCache = server.useCache,
         )

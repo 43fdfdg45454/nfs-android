@@ -32,6 +32,8 @@ data class Server(
     val networkKind: String = "any",
     /** Optionally, the subnet that network gives the phone (which VPN, which Wi-Fi). */
     val networkSubnet: String = "",
+    /** Links to their own folder or one above it followed: loops for whatever walks folders. */
+    val followParentLinks: Boolean = false,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("name", name); put("host", host); put("port", port); put("export", export)
@@ -39,7 +41,7 @@ data class Server(
         put("certificateAlias", certificateAlias); put("uid", uid); put("gid", gid)
         put("gids", JSONArray(gids)); put("umask", umask); put("connections", connections); put("readAheadMb", readAheadMb)
         put("useCache", useCache); put("readOnly", readOnly); put("enabled", enabled)
-        put("networkKind", networkKind); put("networkSubnet", networkSubnet)
+        put("networkKind", networkKind); put("networkSubnet", networkSubnet); put("followParentLinks", followParentLinks)
     }
 
     val title get() = name.ifBlank { host }
@@ -65,6 +67,7 @@ data class Server(
             useCache = o.optBoolean("useCache", true), readOnly = o.optBoolean("readOnly"),
             enabled = o.optBoolean("enabled", true),
             networkKind = o.optString("networkKind", "any"), networkSubnet = o.optString("networkSubnet"),
+            followParentLinks = o.optBoolean("followParentLinks"),
         ).let { server ->
             // Before, QUIC servers kept the gateway (host:port) apart from nfsd's host and port.
             val gateway = o.optString("gateway").takeIf { server.transport == "quic" && it.isNotBlank() } ?: return@let server

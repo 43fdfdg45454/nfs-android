@@ -73,6 +73,7 @@ fun ServerEdit(initial: Server, isNew: Boolean, onDone: () -> Unit) {
             SecuritySection(s, ::update)
             IdentitySection(s, ::update)
             PerformanceSection(s, ::update)
+            AdvancedSection(s, ::update)
             TestSection(s, enabled = problems.none)
             if (!isNew) {
                 TextButton(onClick = { ask = Ask.Remove }, Modifier.fillMaxWidth()) {

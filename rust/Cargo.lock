@@ -579,8 +579,8 @@ dependencies = [
 
 [[package]]
 name = "nfs-client"
-version = "1.0.4"
-source = "git+https://github.com/43fdfdg45454/nfs-core?rev=a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2#a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2"
+version = "1.0.5"
+source = "git+https://github.com/43fdfdg45454/nfs-core?rev=adae34d90f8c6ffb986ddd729f762dd9632895e1#adae34d90f8c6ffb986ddd729f762dd9632895e1"
 dependencies = [
  "bytes",
  "nfs-rpc",
@@ -592,8 +592,8 @@ dependencies = [
 
 [[package]]
 name = "nfs-engine"
-version = "1.0.4"
-source = "git+https://github.com/43fdfdg45454/nfs-core?rev=a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2#a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2"
+version = "1.0.5"
+source = "git+https://github.com/43fdfdg45454/nfs-core?rev=adae34d90f8c6ffb986ddd729f762dd9632895e1#adae34d90f8c6ffb986ddd729f762dd9632895e1"
 dependencies = [
  "bytes",
  "nfs-client",
@@ -616,8 +616,8 @@ dependencies = [
 
 [[package]]
 name = "nfs-rpc"
-version = "1.0.4"
-source = "git+https://github.com/43fdfdg45454/nfs-core?rev=a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2#a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2"
+version = "1.0.5"
+source = "git+https://github.com/43fdfdg45454/nfs-core?rev=adae34d90f8c6ffb986ddd729f762dd9632895e1#adae34d90f8c6ffb986ddd729f762dd9632895e1"
 dependencies = [
  "bytes",
  "nfs-xdr",
@@ -628,8 +628,8 @@ dependencies = [
 
 [[package]]
 name = "nfs-tunnel"
-version = "1.0.4"
-source = "git+https://github.com/43fdfdg45454/nfs-core?rev=a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2#a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2"
+version = "1.0.5"
+source = "git+https://github.com/43fdfdg45454/nfs-core?rev=adae34d90f8c6ffb986ddd729f762dd9632895e1#adae34d90f8c6ffb986ddd729f762dd9632895e1"
 dependencies = [
  "bytes",
  "h3",
@@ -645,8 +645,8 @@ dependencies = [
 
 [[package]]
 name = "nfs-xdr"
-version = "1.0.4"
-source = "git+https://github.com/43fdfdg45454/nfs-core?rev=a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2#a3e2a7b410e9eb845e96d67cf96c637cdd61e7b2"
+version = "1.0.5"
+source = "git+https://github.com/43fdfdg45454/nfs-core?rev=adae34d90f8c6ffb986ddd729f762dd9632895e1#adae34d90f8c6ffb986ddd729f762dd9632895e1"
 dependencies = [
  "bytes",
 ]

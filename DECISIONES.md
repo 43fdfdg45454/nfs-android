@@ -91,6 +91,15 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     archivos copia por su cuenta; entre servidores, siempre así. Un nombre ocupado en el destino
     da "nombre (1).ext", nunca se pisa. Hasta 30 min por copia (una llamada, sin progreso).
 29. **Enlaces simbólicos seguidos dentro del export**, como un montaje del kernel: relativos y
-    absolutos bajo la ruta del export en el servidor; hasta 40 saltos. Uno fuera del export o en
-    bucle se lista como el enlace que es y no se abre. Sin enlaces en el camino, una sola llamada.
+    absolutos bajo la ruta del export en el servidor; hasta 40 saltos. Uno fuera del export, en
+    bucle o a su propia carpeta o una de más arriba (salvo en Avanzados) se lista como el enlace
+    que es y no se abre. Cada tramo sin enlaces es una llamada (`Client::walk`); un enlace, un
+    READLINK más.
 30. **La ruta de un documento sale de su id** (`findDocumentPath`), sin llamar al servidor.
+31. **Escrituras consecutivas juntadas en 1 MiB** antes del núcleo (`Gather`): los gestores de
+    archivos escriben de a 8 KiB y cada llamada al núcleo cuesta más que eso. Se vuelcan antes de
+    leer, de un fsync, de escribir en otro lugar y al cerrar; un error aparece en esa llamada.
+32. **Sección "Avanzados"** por servidor: casos borde apagados por defecto. El primero, seguir los
+    enlaces a su propia carpeta o a una de más arriba (bucles para lo que recorre carpetas).
+33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
+    comparando las carpetas reales del camino (los handles), no los nombres.

@@ -22,13 +22,16 @@ impl Mount {
     /// False, with nothing left behind, when the server cannot copy it: the caller copies through
     /// the device instead.
     pub async fn server_copy(&self, from: String, to: String) -> Result<bool> {
-        if to.starts_with(&format!("{}/", from.trim_end_matches('/'))) {
-            return Err(crate::other(format!("{from} cannot be copied into itself")));
-        }
         if self.resolve(&to, false).await.is_ok() {
             return Err(NfsError::AlreadyExists { reason: format!("{to} exists") });
         }
-        let (_, attrs) = self.resolve(&from, true).await?;
+        let (_, source, attrs) = self.resolve_all(&from, true).await?;
+        // Into itself, by its name or through a link: the copy would copy itself without end.
+        let (mut above, parent, _) = self.resolve_all(split(&to)?.0, true).await?;
+        above.push(parent);
+        if attrs.kind == FileType::Directory && above.contains(&source) {
+            return Err(crate::other(format!("{from} cannot be copied into itself")));
+        }
         let copied = self.copy_tree(&from, &to, attrs.kind, attrs.mode).await;
         if !matches!(copied, Ok(true)) {
             self.remove_tree(&to).await.ok();

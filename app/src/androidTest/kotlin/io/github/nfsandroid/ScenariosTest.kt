@@ -69,13 +69,13 @@ class ScenariosTest {
     }
 
     @Test fun readAndUploadRates() {
-        io.github.nfsandroid.provider.Proxies.ReadStats.reset()
+        io.github.nfsandroid.provider.ProxyStats.Reads.reset()
         val read = open("movie-b.bin") { channel, label ->
             val start = System.nanoTime()
             for (offset in 0 until (64L shl 20) step CHUNK.toLong()) Player.read(channel, label, offset)
             64 * 1.048576 / ((System.nanoTime() - start) / 1e9)
         }
-        report("proxy: ${io.github.nfsandroid.provider.Proxies.ReadStats}")
+        report("proxy: ${io.github.nfsandroid.provider.ProxyStats.Reads}")
         // The same through the core directly, no file proxy: what the proxy costs.
         val direct = runBlocking {
             val server = io.github.nfsandroid.data.ServerStore.get("ci")!!

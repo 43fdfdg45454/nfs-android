@@ -22,6 +22,27 @@ object Provider {
 
     fun setUp() = ServerStore.put(Server(id = "ci", name = "CI", host = host, export = "/"))
 
+    /** The export "/sec" (ci/links.sh) as root, as a plain user (uid 1234), and following links up. */
+    fun setUpSec() = listOf(
+        Server(id = "ci-sec", name = "Sec", host = host, export = "/sec"),
+        Server(id = "ci-user", name = "User", host = host, export = "/sec", uid = 1234, gid = 1234),
+        Server(id = "ci-follow", name = "Follow", host = host, export = "/sec", followParentLinks = true),
+    ).forEach(ServerStore::put)
+
+    /** A directory's entries by name, with their MIME types; null if it cannot be listed. */
+    fun listing(id: String): Map<String, String>? =
+        resolver.query(DocumentsContract.buildChildDocumentsUri(authority, id), null, null, null, null)?.use { c ->
+            generateSequence {
+                if (c.moveToNext()) c.getString(c.getColumnIndexOrThrow(Document.COLUMN_DISPLAY_NAME)) to
+                    c.getString(c.getColumnIndexOrThrow(Document.COLUMN_MIME_TYPE)) else null
+            }.toMap()
+        }
+
+    /** Whether the document opens and reads, or opens to append a byte ("wa": nothing truncated). */
+    fun opens(id: String) = runCatching { resolver.openInputStream(uri(id))!!.use { it.read() } }.isSuccess
+    fun appends(id: String) = runCatching { resolver.openOutputStream(uri(id), "wa")!!.use { it.write('\n'.code) } }.isSuccess
+    fun deletes(id: String) = runCatching { DocumentsContract.deleteDocument(resolver, uri(id)) }.getOrDefault(false)
+
     fun uri(id: String): Uri = DocumentsContract.buildDocumentUri(authority, id)
 
     fun report(line: String) = Log.i("nfs-test", "RESULT $line")
