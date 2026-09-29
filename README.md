@@ -59,8 +59,9 @@ side in landscape or on a tablet. Each page explains its options:
   the file as media servers keep them (`movie-poster.jpg`, `movie-thumb.jpg`, `movie.jpg`, then
   the folder's `poster.jpg`, `folder.jpg`, `cover.jpg`), the picture a song or an MP4 carries, a
   Matroska attachment (`cover.jpg`, found without reading the video), a photo's EXIF thumbnail
-  (off by default) and decoding (a video's frame, the whole image). The most one thumbnail may read
-  (32 MB by default) keeps a video without a cover from being downloaded for its icon.
+  (off by default) and decoding (a video's frame, the whole image). The most Android's decoders may
+  read for one (embedded picture and decoding; 32 MB by default) keeps a video without a cover from
+  being downloaded for its icon; past it that source is dropped and the next one tried.
 
 **Test the connection** tries it before saving. Then the server shows up in the file picker of
 every app, and **Browse** opens it in the system's Files app.

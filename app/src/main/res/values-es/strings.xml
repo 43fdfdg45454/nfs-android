@@ -218,8 +218,8 @@
     <string name="thumb_decode">Decodificar</string>
     <string name="thumb_decode_help">Un cuadro del video (en el segundo 1), o la imagen entera achicada: lo que más lee.</string>
     <string name="drag_to_order">Arrastrar para reordenar</string>
-    <string name="thumbnail_max">Máximo leído por miniatura</string>
-    <string name="thumbnail_max_help">Entre todas sus fuentes: al pasarlo, la búsqueda se corta (un video sin tapa que exige leer casi todo, como un .m2ts). Por VPN, cuanto menos, mejor.</string>
+    <string name="thumbnail_max">Máximo a decodificar por miniatura</string>
+    <string name="thumbnail_max_help">Lo que pueden leer Imagen incrustada y Decodificar (los decodificadores de Android) por miniatura: al pasarlo, esa fuente se descarta y se prueba la siguiente. Pueden recorrer casi todo un video sin índice (como un .m2ts); las demás fuentes leen solo lo que necesitan.</string>
     <string name="section_log">Log</string>
     <string name="section_log_help">Las líneas de este servidor en nfs-log.txt</string>
     <string name="has_problem">Hay algo para corregir</string>

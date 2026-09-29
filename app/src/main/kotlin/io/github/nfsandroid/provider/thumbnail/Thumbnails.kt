@@ -17,8 +17,8 @@ import java.util.concurrent.Semaphore
 /**
  * Thumbnails of images, videos and audio, two at a time so that playback does not wait behind
  * them, kept on disk by document, version and strategy. The server's sources are tried in its
- * order, sharing its cap on what one may read; each search is logged with the source that gave
- * the picture and what it read.
+ * order; those that go through Android's decoders are held to its cap on what they may read. Each
+ * search is logged with the source that gave the picture and what it read.
  */
 object Thumbnails {
     private val slots = Semaphore(2)
@@ -52,8 +52,8 @@ object Thumbnails {
         val bitmap = mount.read(path).use { file ->
             val target = Target(server, mount, path, mime, size, budget, file)
             strategy(server).firstNotNullOfOrNull { key ->
-                if (budget.spent) return@firstNotNullOfOrNull null
-                runCatching { Sources.find(key, target) }.onFailure { failed = it }.getOrNull()?.also { source = key }
+                runCatching { Sources.find(key, target) }.onFailure { failed = it }.getOrNull()
+                    ?.takeUnless { key in Sources.CAPPED && budget.spent }?.also { source = key }
             }
         }
         val took = System.nanoTime() - start

@@ -145,8 +145,10 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     cada una con su casilla: imagen junto al archivo (convenciones de Kodi, Jellyfin y Plex; el
     listado de la carpeta se guarda 30 s), imagen incrustada, adjunto de MKV (cabecera, seek head y
     nombres de los adjuntos, sin leer el video), EXIF (apagada: borrosa en una grilla) y
-    decodificar. Un tope de MB por miniatura (32 por defecto) para todas sus fuentes; al pasarlo la
-    búsqueda se corta. La caché de miniaturas depende también de la estrategia. Cada búsqueda deja
+    decodificar. Un tope de MB por miniatura (32 por defecto) solo para Imagen incrustada y Decodificar:
+    pasan por los decodificadores de Android, que pueden recorrer casi todo un video sin índice; al
+    pasarlo, esa fuente se descarta (su imagen quedaría a medias) y se prueba la siguiente. Las
+    demás leen solo lo que necesitan. La caché de miniaturas depende también de la estrategia. Cada búsqueda deja
     en el log la fuente, lo leído y las lecturas.
 40. **Edición del servidor por páginas** (lista y detalle, como los Ajustes de Android): General
     (conexión y acceso), Red, Seguridad, Identidad, Rendimiento, Miniaturas, Avanzados, Log y

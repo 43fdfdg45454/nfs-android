@@ -63,6 +63,7 @@ class ThumbnailTest {
         put("both.jpg", image(400))
         put("noise.mp4", Random.nextBytes(1 shl 20))
         put("noise-poster.jpg", image(1600, noise = true))
+        put("noise.jpg", image(1600, noise = true))
 
         assertNotNull(thumbnail("ci-thumbs", "clip.mp4"))
         assertEquals("sidecar", search("clip.mp4")["source"])
@@ -78,9 +79,13 @@ class ThumbnailTest {
         assertEquals("attachment", search("both.mkv")["source"])
         assertNull(thumbnail("ci-thumbs-no-sidecar", "clip.mp4"))
         assertEquals(null, search("clip.mp4")["source"])
-        assertNull(thumbnail("ci-thumbs-capped", "noise.mp4"))
-        val capped = search("noise.mp4")
-        assertTrue("not capped: $capped", " capped " in NfsLog.file(Provider.context).readLines().last { "file=/$dir/noise.mp4 " in it })
+        // The cap holds Android's decoders only: a poster of several MB next to the video still
+        // comes, and decoding a large image stops at 1 MB, its partial picture dropped.
+        assertNotNull(thumbnail("ci-thumbs-capped", "noise.mp4"))
+        assertEquals("sidecar", search("noise.mp4")["source"])
+        assertNull(thumbnail("ci-thumbs-capped", "noise.jpg"))
+        val capped = search("noise.jpg")
+        assertTrue("not capped: $capped", " capped " in NfsLog.file(Provider.context).readLines().last { "file=/$dir/noise.jpg " in it })
         assertEquals("1.0MB", capped["read"])
         Provider.report("Thumbnails: sidecar, MKV attachment read ${mkv["read"]} in ${mkv["reads"]} reads, capped at ${capped["read"]}")
         Provider.removeTree("ci:$dir")

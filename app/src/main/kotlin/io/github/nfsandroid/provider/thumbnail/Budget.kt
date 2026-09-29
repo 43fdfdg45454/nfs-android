@@ -14,18 +14,25 @@ typealias Reader = (Long, Int) -> ByteArray
 
 class Spent : IOException("the thumbnail's byte cap was reached")
 
-/** What looking for one thumbnail may read, across its sources and files: past it, nothing more. */
+/**
+ * What looking for one thumbnail reads (for the log), and the cap on what Android's media and image
+ * decoders may read for it: they can go through most of a file (a video without an index), where
+ * the other sources read only what they need.
+ */
 class Budget(private val max: Long) {
     val read = AtomicLong()
     val reads = AtomicLong()
-    val spent get() = read.get() >= max
+    private val decoded = AtomicLong()
+    val spent get() = decoded.get() >= max
 
-    fun reader(file: ReadFile): Reader = { at, len ->
-        val left = max - read.get()
+    /** A reader of [file]; [capped], one that stops at the cap. */
+    fun reader(file: ReadFile, capped: Boolean = false): Reader = { at, len ->
+        val left = if (capped) max - decoded.get() else Long.MAX_VALUE
         if (left <= 0) throw Spent()
         file.readBlocking(at.toULong(), minOf(len.toLong(), left).toInt().toUInt()).also {
             read.addAndGet(it.size.toLong())
             reads.incrementAndGet()
+            if (capped) decoded.addAndGet(it.size.toLong())
         }
     }
 }

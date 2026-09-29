@@ -219,8 +219,8 @@
     <string name="thumb_decode">Decode</string>
     <string name="thumb_decode_help">A frame of the video (at 1 s), or the whole image scaled down: the most read.</string>
     <string name="drag_to_order">Drag to reorder</string>
-    <string name="thumbnail_max">Most read per thumbnail</string>
-    <string name="thumbnail_max_help">Across its sources: past it the search stops (a video without a cover that needs reading most of it, such as an .m2ts). Over a VPN, less is kinder.</string>
+    <string name="thumbnail_max">Most decoded per thumbnail</string>
+    <string name="thumbnail_max_help">What Embedded picture and Decode (Android\'s decoders) may read for one: past it that source is dropped and the next one tried. They can go through most of a video without an index (such as an .m2ts); the other sources read only what they need.</string>
     <string name="section_log">Log</string>
     <string name="section_log_help">This server\'s lines in nfs-log.txt</string>
     <string name="has_problem">Something to fix</string>
