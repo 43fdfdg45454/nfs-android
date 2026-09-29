@@ -7,6 +7,9 @@ import android.os.ProxyFileDescriptorCallback
 import android.os.storage.StorageManager
 import android.system.ErrnoException
 import android.system.OsConstants
+import io.github.nfsandroid.data.Server
+import io.github.nfsandroid.log.LogCategory
+import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
 import kotlinx.coroutines.runBlocking
 import uniffi.nfscore.ReadFile
@@ -44,19 +47,19 @@ object Proxies {
         }
     }
 
-    private fun io(what: String, block: () -> Int): Int = try {
+    private fun io(server: Server, op: String, name: String, block: () -> Int): Int = try {
         block()
     } catch (e: Exception) {
-        NfsLog.line("$what: ${e.message}")
-        throw ErrnoException(what, OsConstants.EIO)
+        NfsLog.log(LogLevel.ERROR, LogCategory.FILES, server, "$op failed", "file" to name, "error" to NfsLog.reason(e))
+        throw ErrnoException(op, OsConstants.EIO)
     }
 
-    fun read(storage: StorageManager, name: String, file: ReadFile): ParcelFileDescriptor {
+    fun read(storage: StorageManager, server: Server, name: String, file: ReadFile): ParcelFileDescriptor {
         val thread = thread(name)
         val callback = object : ProxyFileDescriptorCallback() {
             override fun onGetSize() = file.size().toLong()
 
-            override fun onRead(offset: Long, size: Int, data: ByteArray) = io("read $name") {
+            override fun onRead(offset: Long, size: Int, data: ByteArray) = io(server, "read", name) {
                 val start = System.nanoTime()
                 val bytes = file.readBlocking(offset.toULong(), size.toUInt())
                 val core = System.nanoTime()
@@ -80,23 +83,26 @@ object Proxies {
      * A file to write, starting from [size] bytes; with [readable], to read too (what was written
      * included). fsync puts what was written on the server's stable storage.
      */
-    fun write(storage: StorageManager, document: String, name: String, file: WriteFile, size: Long = 0, readable: Boolean = false): ParcelFileDescriptor {
+    fun write(
+        storage: StorageManager, server: Server, document: String, name: String, file: WriteFile, via: String,
+        size: Long = 0, readable: Boolean = false,
+    ): ParcelFileDescriptor {
         val (thread, done) = thread(name) to writer(document)
         val callback = object : ProxyFileDescriptorCallback() {
             private var end = size
             private val gather = Gather(file)
-            private val upload = Upload(name, "writes through the file proxy")
+            private val upload = Upload(server, name, via)
 
             override fun onGetSize() = end
 
-            override fun onRead(offset: Long, count: Int, data: ByteArray) = io("read $name") {
+            override fun onRead(offset: Long, count: Int, data: ByteArray) = io(server, "read", name) {
                 gather.flush()
                 val bytes = file.readBlocking(offset.toULong(), count.toUInt())
                 bytes.copyInto(data)
                 bytes.size
             }
 
-            override fun onWrite(offset: Long, count: Int, data: ByteArray) = io("write $name") {
+            override fun onWrite(offset: Long, count: Int, data: ByteArray) = io(server, "write", name) {
                 val begin = System.nanoTime()
                 gather.write(offset, count, data)
                 end = maxOf(end, offset + count)
@@ -107,12 +113,12 @@ object Proxies {
             }
 
             override fun onFsync() {
-                io("sync $name") { gather.flush(); runBlocking { file.sync() }; 0 }
+                io(server, "sync", name) { gather.flush(); runBlocking { file.sync() }; 0 }
             }
 
             override fun onRelease() {
-                runCatching { gather.flush(); runBlocking { file.finish() } }.onFailure { NfsLog.line("closing $name: ${it.message}") }
-                upload.done()
+                upload.closed()
+                runCatching { gather.flush(); runBlocking { file.finish() } }.onSuccess { upload.done() }.onFailure { upload.failed(it) }
                 file.close()
                 done()
                 thread.quitSafely()

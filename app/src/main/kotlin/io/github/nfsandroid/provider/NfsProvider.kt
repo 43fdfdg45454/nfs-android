@@ -13,7 +13,11 @@ import android.provider.DocumentsContract.Document
 import android.provider.DocumentsContract.Root
 import android.provider.DocumentsProvider
 import io.github.nfsandroid.core.Mounts
+import io.github.nfsandroid.data.Server
 import io.github.nfsandroid.data.ServerStore
+import io.github.nfsandroid.log.LogCategory
+import io.github.nfsandroid.log.LogLevel
+import io.github.nfsandroid.log.NfsLog
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import java.io.FileNotFoundException
@@ -24,7 +28,7 @@ class NfsProvider : DocumentsProvider() {
 
     override fun onCreate() = true.also { Staged.clean(context!!) }
 
-    private fun <T> nfs(id: String, timeoutMs: Long = CALL_MS, block: suspend (uniffi.nfscore.Mount, String, io.github.nfsandroid.data.Server) -> T): T {
+    private fun <T> nfs(op: String, id: String, timeoutMs: Long = CALL_MS, block: suspend (uniffi.nfscore.Mount, String, Server) -> T): T {
         val (serverId, path) = Documents.parse(id)
         val server = ServerStore.get(serverId) ?: throw FileNotFoundException("no server for $id")
         return try {
@@ -32,8 +36,8 @@ class NfsProvider : DocumentsProvider() {
             runBlocking { withTimeout(timeoutMs) { block(Mounts.get(server), path, server) } }
         } catch (e: Exception) {
             // DocumentsProvider turns this into an empty answer: the log is where it shows.
-            io.github.nfsandroid.log.NfsLog.line("${server.title}/$path: $e")
-            throw FileNotFoundException("${server.title}/$path: ${e.message}")
+            NfsLog.log(LogLevel.ERROR, LogCategory.FILES, server, "$op failed", "path" to "/$path", "error" to NfsLog.reason(e))
+            throw FileNotFoundException("${server.title}/$path: ${NfsLog.reason(e)}")
         }
     }
 
@@ -52,12 +56,12 @@ class NfsProvider : DocumentsProvider() {
     }
 
     override fun queryDocument(id: String, projection: Array<String>?): Cursor = MatrixCursor(projection ?: Documents.COLUMNS).apply {
-        nfs(id) { mount, path, server -> Documents.row(this, id, mount.stat(path), server, path.substringAfterLast('/').ifEmpty { server.title }) }
+        nfs("query", id) { mount, path, server -> Documents.row(this, id, mount.stat(path), server, path.substringAfterLast('/').ifEmpty { server.title }) }
     }
 
     override fun queryChildDocuments(parent: String, projection: Array<String>?, sortOrder: String?): Cursor =
         MatrixCursor(projection ?: Documents.COLUMNS).apply {
-            nfs(parent) { mount, path, server -> mount.list(path).forEach { Documents.row(this, Documents.child(parent, it.name), it, server) } }
+            nfs("list", parent) { mount, path, server -> mount.list(path).forEach { Documents.row(this, Documents.child(parent, it.name), it, server) } }
             Watcher.listed(context!!, parent)
             setNotificationUri(context!!.contentResolver, DocumentsContract.buildChildDocumentsUri(authority, parent))
         }
@@ -68,22 +72,24 @@ class NfsProvider : DocumentsProvider() {
         return open(id, mode)
     }
 
-    private fun open(id: String, mode: String) = nfs(id) { mount, path, server ->
+    private fun open(id: String, mode: String) = nfs("open", id) { mount, path, server ->
         val storage = context!!.getSystemService(StorageManager::class.java)
         val truncate = 't' in mode
         // Whatever the mode, a writer this document still has finishes first (close-to-open).
         Proxies.awaitWriters(id)
         when (mode) {
-            "r" -> Proxies.read(storage, path, mount.read(path))
+            "r" -> Proxies.read(storage, server, path, mount.read(path)).also { opened(server, path, mode, "proxy") }
             "w", "wt" -> mount.create(path, exclusive = false).let { file ->
-                if (server.writeMode == "local" && Staged.room(context!!)) Staged.write(context!!, server, id, path, file)
-                else Proxies.write(storage, id, path, file)
+                val via = if (server.writeMode != "local") "proxy" else if (Staged.room(context!!)) "local" else "proxy-low-space"
+                opened(server, path, mode, via)
+                if (via == "local") Staged.write(context!!, server, id, path, file) else Proxies.write(storage, server, id, path, file, via)
             }
             // In place: "rw" reads and writes, "rwt" empties it first, "wa" appends (the
             // descriptor starts at the end: the proxy does not know O_APPEND).
             else -> {
                 val size = if (truncate) 0L else mount.stat(path).size.toLong()
-                Proxies.write(storage, id, path, mount.edit(path, truncate), size, readable = 'r' in mode)
+                opened(server, path, mode, "proxy-edit")
+                Proxies.write(storage, server, id, path, mount.edit(path, truncate), "proxy-edit", size, readable = 'r' in mode)
                     .also { if (mode == "wa") Os.lseek(it.fileDescriptor, size, OsConstants.SEEK_SET) }
             }
         }
@@ -95,23 +101,22 @@ class NfsProvider : DocumentsProvider() {
         return thumbnail(id, size)
     }
 
-    private fun thumbnail(id: String, size: android.graphics.Point) = nfs(id) { mount, path, _ ->
+    private fun thumbnail(id: String, size: android.graphics.Point) = nfs("thumbnail", id) { mount, path, server ->
         val stat = mount.stat(path)
         val key = "$id:${stat.modified}:${stat.size}"
-        Thumbnails.get(context!!, key, Documents.mime(stat), size) { runBlocking { mount.read(path) } }
-            ?: throw FileNotFoundException("no thumbnail for $path")
-    }
+        Thumbnails.get(context!!, server, "/$path", key, Documents.mime(stat), size) { runBlocking { mount.read(path) } }
+    } ?: throw FileNotFoundException("no thumbnail for $id") // Thumbnails logged why
 
-    override fun createDocument(parent: String, mimeType: String, name: String): String = nfs(parent) { mount, path, _ ->
+    override fun createDocument(parent: String, mimeType: String, name: String): String = nfs("create", parent) { mount, path, _ ->
         val child = if (path.isEmpty()) name else "$path/$name"
         if (mimeType == Document.MIME_TYPE_DIR) mount.mkdir(child) else mount.create(child, exclusive = true).run { finish(); close() }
         changed(parent)
         Documents.child(parent, name)
     }
 
-    override fun deleteDocument(id: String) = nfs(id) { mount, path, _ -> mount.remove(path); changed(parent(id)) }
+    override fun deleteDocument(id: String) = nfs("delete", id) { mount, path, _ -> mount.remove(path); changed(parent(id)) }
 
-    override fun renameDocument(id: String, name: String): String = nfs(id) { mount, path, _ ->
+    override fun renameDocument(id: String, name: String): String = nfs("rename", id) { mount, path, _ ->
         val to = path.substringBeforeLast('/', "").let { if (it.isEmpty()) name else "$it/$name" }
         mount.rename(path, to)
         changed(parent(id))
@@ -123,7 +128,7 @@ class NfsProvider : DocumentsProvider() {
         val (server, from) = Documents.parse(sourceId)
         if (server != Documents.parse(targetParentId).first) throw UnsupportedOperationException("copy across servers")
         if (ServerStore.get(server)?.serverCopies == false) throw UnsupportedOperationException("server copies are off")
-        val copied = nfs(targetParentId, COPY_MS) { mount, dir, _ ->
+        val copied = nfs("copy", targetParentId, COPY_MS) { mount, dir, _ ->
             val name = Names.free(mount, dir, from.substringAfterLast('/'))
             name.takeIf { mount.serverCopy(from, Names.join(dir, name)) }
         } ?: throw UnsupportedOperationException("the server cannot copy $from")
@@ -135,7 +140,7 @@ class NfsProvider : DocumentsProvider() {
     override fun moveDocument(sourceId: String, sourceParentId: String, targetParentId: String): String {
         val (server, from) = Documents.parse(sourceId)
         if (server != Documents.parse(targetParentId).first) throw UnsupportedOperationException("move across servers")
-        val moved = nfs(targetParentId) { mount, dir, _ ->
+        val moved = nfs("move", targetParentId) { mount, dir, _ ->
             Names.free(mount, dir, from.substringAfterLast('/')).also { mount.rename(from, Names.join(dir, it)) }
         }
         changed(sourceParentId)
@@ -148,6 +153,9 @@ class NfsProvider : DocumentsProvider() {
     override fun isChildDocument(parent: String, id: String) = parent.substringAfter(':').let { p ->
         Documents.parse(id).let { (server, path) -> server == Documents.parse(parent).first && (p.isEmpty() || path.startsWith("$p/")) }
     }
+
+    private fun opened(server: Server, path: String, mode: String, via: String) =
+        NfsLog.log(LogLevel.DEBUG, LogCategory.FILES, server, "opened", "path" to "/$path", "mode" to mode, "via" to via)
 
     private fun parent(id: String) = Documents.parse(id).let { (server, path) -> Documents.id(server, path.substringBeforeLast('/', "")) }
 

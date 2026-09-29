@@ -8,7 +8,9 @@ import io.github.nfsandroid.data.ServerStore
 import io.github.nfsandroid.provider.Proxies
 import io.github.nfsandroid.provider.ProxyStats
 import io.github.nfsandroid.provider.Staged
+import io.github.nfsandroid.log.NfsLog
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.FileOutputStream
@@ -48,18 +50,30 @@ class UploadTest {
         return "the app wrote in %.1f s; on the server after %.1f s (%.1f MB/s)".format(written, uploaded, size / 1e6 / uploaded)
     }
 
+    private fun setUp() {
+        Provider.setUp()
+        ServerStore.put(Server(id = "ci-local", name = "Local", host = Provider.host, export = "/", writeMode = "local"))
+    }
+
+    /** The upload's line in nfs-log.txt, with the way it went and where its time went. */
+    private fun logged(server: String, via: String) {
+        val line = NfsLog.file(Provider.context).readLines().last { " uploaded file=upload-$server.bin " in it }
+        for (field in listOf("via=$via", "size=67.1MB", "writing=", "core=", "closing=")) assertTrue("$field in $line", field in line)
+    }
+
     @Test
     fun uploadsThroughALocalCopyAndThroughTheProxy() {
-        Provider.setUp()
-        ServerStore.put(Server(id = "ci-proxy", name = "Proxy", host = Provider.host, export = "/", writeMode = "proxy"))
-        Provider.report("Upload 64 MiB by 8 KiB writes, local copy: ${upload("ci", 8 shl 10)}")
-        Provider.report("Upload 64 MiB by 8 KiB writes, file proxy: ${upload("ci-proxy", 8 shl 10)} (${ProxyStats.Writes})")
+        setUp()
+        Provider.report("Upload 64 MiB by 8 KiB writes, local copy: ${upload("ci-local", 8 shl 10)}")
+        logged("ci-local", "local")
+        Provider.report("Upload 64 MiB by 8 KiB writes, file proxy: ${upload("ci", 8 shl 10)} (${ProxyStats.Writes})")
+        logged("ci", "proxy")
     }
 
     @Test
     fun whatTheAppRewritesOrCutsReachesTheServer() {
-        Provider.setUp()
-        val uri = create("ci", "rewritten.bin")
+        setUp()
+        val uri = create("ci-local", "rewritten.bin")
         val data = ByteArray(3 shl 20) { (it % 251).toByte() }
         val cut = (2 shl 20) + 5
         Provider.resolver.openFileDescriptor(uri, "w")!!.use { fd ->

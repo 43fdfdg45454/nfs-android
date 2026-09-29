@@ -27,7 +27,7 @@ fun AdvancedSection(s: Server, onChange: (Server) -> Unit) =
             onChange(s.copy(serverCopies = it))
         }
         Text(stringResource(R.string.write_mode), style = MaterialTheme.typography.bodyLarge)
-        val ways = listOf("local" to R.string.write_local, "proxy" to R.string.write_proxy)
+        val ways = listOf("proxy" to R.string.write_proxy, "local" to R.string.write_local)
         Segmented(ways.map { (value, label) -> value to stringResource(label) }, s.writeMode) { onChange(s.copy(writeMode = it)) }
         Help(stringResource(R.string.write_mode_help))
         Text(stringResource(R.string.disconnect_after), style = MaterialTheme.typography.bodyLarge)
@@ -36,4 +36,5 @@ fun AdvancedSection(s: Server, onChange: (Server) -> Unit) =
             onChange(s.copy(disconnectMinutes = it))
         }
         Help(stringResource(R.string.disconnect_after_help))
+        LogSettings(s, onChange)
     }

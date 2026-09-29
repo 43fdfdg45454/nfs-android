@@ -103,23 +103,33 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
 32. **Sección "Avanzados"** por servidor: casos borde con lo sensato por defecto. Seguir los
     enlaces a su propia carpeta o a una de más arriba (apagado: bucles para lo que recorre
     carpetas); copias en el servidor (encendido; apagado, el gestor copia con progreso); desconectar
-    sin uso a los 1, 5 (por defecto), 15 o 60 minutos, o nunca; escritura de archivos (copia local
-    por defecto, o proxy).
+    sin uso a los 1, 5 (por defecto), 15 o 60 minutos, o nunca; escritura de archivos (proxy por
+    defecto, o copia local); el log del servidor.
 33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
     comparando las carpetas reales del camino (los handles), no los nombres.
-34. **Archivos escritos enteros ("w", "wt"), por una copia local** (por defecto; o por el proxy, en
-    Avanzados): la app recibe un archivo real en la caché privada (velocidad de disco, moverse,
-    fsync), que se sube por bloques de 1 MiB mientras crece y se termina al cerrarlo. Los bloques
-    subidos con el archivo abierto guardan su SHA-256; al cerrar, los que cambiaron (un encabezado
-    escrito al final) se suben de nuevo, y si la app lo acortó, se acorta en el servidor. El proxy
-    cuesta ~1 ms por escritura (6-7 MB/s con escrituras de 8 KiB por una Wi-Fi de ~37 MB/s). La
-    copia es solo caché: nadie más la abre, se borra al terminar (y al arrancar, lo que quedó), y el
-    documento no se abre de nuevo ni tiene miniatura hasta que la subida termina. Con menos de 1 GB
-    libre, proxy. Progreso y errores en notificaciones (canales "Subidas en curso", silencioso, y
-    "Subidas fallidas"); una línea por subida en el log. Los archivos editados en el lugar ("rw",
-    "wa") siguen por el proxy.
+34. **Archivos escritos enteros ("w", "wt"): por el proxy** (por defecto: la app se entera de
+    cualquier error de escritura) **o por una copia local** (en Avanzados): la app recibe un
+    archivo real en la caché privada (velocidad de disco, moverse, fsync), que se sube por bloques
+    de 1 MiB mientras crece y se termina al cerrarlo. Los bloques subidos con el archivo abierto
+    guardan su SHA-256; al cerrar, los que cambiaron (un encabezado escrito al final) se suben de
+    nuevo, y si la app lo acortó, se acorta en el servidor. El proxy le suma un costo a cada
+    escritura, que varía según el teléfono: con escrituras chicas, la copia local es varias veces
+    más rápida. La copia es solo caché: nadie más la abre, se borra al terminar (y al arrancar, lo
+    que quedó), y el documento no se abre de nuevo ni tiene miniatura hasta que la subida termina.
+    Con menos de 1 GB libre, proxy. Progreso y errores en notificaciones (canales "Subidas en
+    curso", silencioso, y "Subidas fallidas"). Los archivos editados en el lugar ("rw", "wa")
+    siguen por el proxy.
 35. **Pruebas del emulador en grupos a la vez** (`ci/shards.txt`, un emulador por grupo): cada uno
     arranca de un snapshot en caché, compila los APK mientras arrancan nfsd y el emulador, y corre
     sus clases con `am instrument`, sin Gradle adentro. `ci/shards.sh` exige que cada clase esté en
     un solo grupo y que los grupos sean la matriz del job. El núcleo se compila por partes a la vez
     (x86_64, bindings, arm64-v8a); el emulador espera solo las dos primeras.
+36. **Log estructurado** (`nfs-log.txt`): una línea por evento con hora, nivel, categoría
+    (connection, files, uploads, thumbnails, test; network y service son de la app), servidor,
+    evento y campos `clave=valor` (entre comillas si tienen espacios; números sin el formato del
+    idioma). Por servidor, en Avanzados: encendido (por defecto) y nivel (errores, avisos, info por
+    defecto, detalle), con lo que agrega cada nivel y lo que guarda cada categoría. Las líneas de la
+    red y del servicio se guardan siempre. Cada subida dice cómo fue (`via`: local, proxy,
+    proxy-edit, proxy-low-space) y en qué se fue el tiempo (writing, core, closing); cada
+    miniatura, lo que leyó (aviso si tarda más de 2 s o no se puede hacer). Los errores van con su
+    mensaje, no con el nombre de la clase (el release lo acorta).

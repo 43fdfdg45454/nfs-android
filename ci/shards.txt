@@ -2,5 +2,5 @@
 # scenarios alone, as they take longest. Every test class is in exactly one (ci/shards.sh).
 scenarios ScenariosTest
 uploads UploadTest TransfersTest
-modes ModesTest WatchTest ProviderTest
+modes ModesTest WatchTest ProviderTest LogTest
 links LinksTest LinkEscapesTest LinkRightsTest

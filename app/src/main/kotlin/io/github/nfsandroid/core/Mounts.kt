@@ -3,6 +3,8 @@ package io.github.nfsandroid.core
 import android.content.Context
 import io.github.nfsandroid.data.Server
 import io.github.nfsandroid.data.ServerStore
+import io.github.nfsandroid.log.LogCategory
+import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
 import io.github.nfsandroid.service.ConnectionService
 import kotlinx.coroutines.CoroutineScope
@@ -79,10 +81,13 @@ object Mounts {
         }
         result.onSuccess {
             Unreachable.reachable(server.id)
-            NfsLog.line("${server.title}: connected")
+            NfsLog.log(LogLevel.INFO, LogCategory.CONNECTION, server, "connected", "transport" to server.transport, "security" to server.security)
             io.github.nfsandroid.provider.Spaces.refresh(context, server)
         }
-            .onFailure { Unreachable.failed(server.id, it.message.orEmpty()); NfsLog.line("${server.title}: could not connect: ${it.message}") }
+            .onFailure {
+                Unreachable.failed(server.id, it.message.orEmpty())
+                NfsLog.log(LogLevel.ERROR, LogCategory.CONNECTION, server, "could not connect", "error" to NfsLog.reason(it))
+            }
         return result.getOrThrow()
     }
 
@@ -121,10 +126,13 @@ object Mounts {
         val now = System.currentTimeMillis()
         mounts.entries.removeAll { (id, entry) ->
             val minutes = ServerStore.get(id)?.disconnectMinutes ?: 5
-            (minutes > 0 && now - entry.second > minutes * 60_000L).also { idle -> if (idle) entry.first.disconnect().also { NfsLog.line("$id: idle, closed") } }
+            (minutes > 0 && now - entry.second > minutes * 60_000L).also { idle -> if (idle) entry.first.disconnect().also { ServerStore.get(id)?.let { idleClosed(it, minutes) } } }
         }
         after()
     }
+
+    private fun idleClosed(server: Server, minutes: Int) =
+        NfsLog.log(LogLevel.DEBUG, LogCategory.CONNECTION, server, "closed", "reason" to "unused for $minutes min")
 
     private fun after() {
         count.value = mounts.size

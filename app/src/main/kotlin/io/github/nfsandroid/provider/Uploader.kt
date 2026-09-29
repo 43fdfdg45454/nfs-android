@@ -3,7 +3,6 @@ package io.github.nfsandroid.provider
 import android.content.Context
 import io.github.nfsandroid.core.Mounts
 import io.github.nfsandroid.data.Server
-import io.github.nfsandroid.log.NfsLog
 import io.github.nfsandroid.service.UploadNotice
 import java.io.File
 import java.io.RandomAccessFile
@@ -26,7 +25,7 @@ class Uploader(
     private val file: WriteFile,
 ) {
     private val digests = HashMap<Long, ByteArray>()
-    private val upload = Upload(path, "blocks from a local copy")
+    private val upload = Upload(server, path, "local")
     private var sent = 0L
     private var end = 0L
 
@@ -37,6 +36,7 @@ class Uploader(
                     while (copy.length() - sent >= BLOCK) send(copy, sent, BLOCK, keep = true).also { sent += BLOCK }
                     UploadNotice.progress(context, path, sent, copy.length())
                 }
+                upload.closed()
                 val size = copy.length()
                 for ((block, sum) in digests.toList()) {
                     val at = block * BLOCK
@@ -56,7 +56,7 @@ class Uploader(
             upload.done()
             UploadNotice.done(context, path)
         }.onFailure {
-            NfsLog.line("uploading $path: ${it.message}")
+            upload.failed(it)
             UploadNotice.failed(context, path, it.message.orEmpty())
         }
         file.close()

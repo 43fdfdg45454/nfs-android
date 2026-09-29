@@ -34,7 +34,8 @@ etapa 2 está estable.
 - `app/src/main/kotlin/io/github/nfsandroid/`: `data` (servidores, `servers.json` con formato),
   `core` (montajes, confianza TLS, identidad de KeyChain, conexión), `service` (servicio en primer
   plano), `provider` (DocumentsProvider: ids `servidor:ruta`, proxy de descriptores), `ui`
-  (Compose), `log` (`nfs-log.txt`, `crash-log.txt`).
+  (Compose), `log` (`nfs-log.txt`: una línea por evento con nivel, categoría, servidor y campos
+  `clave=valor`, nivel por servidor en Avanzados; `crash-log.txt`).
 - `rust/` (nfs-ffi): el puente al núcleo con UniFFI (montaje, archivos, identidad de KeyChain con
   firma delegada). Depende de nfs-core por git a un commit fijo (`rev` en `rust/Cargo.toml`): se
   adelanta a propósito, con la CI de nfs-core en verde. `ci/core.sh <parte>` compila `libnfscore.so`
@@ -55,7 +56,8 @@ etapa 2 está estable.
   (`LinkEscapesTest`: nada fuera del export ni en bucle; `LinkRightsTest`: permisos como por la
   ruta real con un usuario común, borrar o copiar un enlace conserva su destino; árboles de
   `ci/links.sh`) y subidas con escrituras de 8 KiB por una copia local y por el proxy, y lo que una
-  app reescribe o acorta antes de cerrar (`UploadTest`). Resultados por logcat (`nfs-test`) a una
+  app reescribe o acorta antes de cerrar (`UploadTest`, con la línea de cada subida en el log),
+  y el formato y los niveles del log (`LogTest`). Resultados por logcat (`nfs-test`) a una
   anotación por grupo.
 - Seguridad (`security.yml`, en cada push y a diario): `cargo deny` sobre `rust/`, secretos en el
   historial (`ci/secrets.sh`), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions); los

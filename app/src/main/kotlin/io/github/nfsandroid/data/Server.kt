@@ -38,8 +38,11 @@ data class Server(
     val serverCopies: Boolean = true,
     /** Minutes unused before the connection closes; 0: never (while the app runs). */
     val disconnectMinutes: Int = 5,
-    /** Files written whole: "local" (a local copy, uploaded as it grows) or "proxy" (Android's file proxy). */
-    val writeMode: String = "local",
+    /** Files written whole: "proxy" (Android's file proxy) or "local" (a local copy, uploaded as it grows). */
+    val writeMode: String = "proxy",
+    /** Its lines in nfs-log.txt: on or off, and up to which level ([io.github.nfsandroid.log.LogLevel]). */
+    val logEnabled: Boolean = true,
+    val logLevel: String = "info",
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("name", name); put("host", host); put("port", port); put("export", export)
@@ -49,6 +52,7 @@ data class Server(
         put("useCache", useCache); put("readOnly", readOnly); put("enabled", enabled)
         put("networkKind", networkKind); put("networkSubnet", networkSubnet); put("followParentLinks", followParentLinks)
         put("serverCopies", serverCopies); put("disconnectMinutes", disconnectMinutes); put("writeMode", writeMode)
+        put("logEnabled", logEnabled); put("logLevel", logLevel)
     }
 
     val title get() = name.ifBlank { host }
@@ -76,7 +80,8 @@ data class Server(
             networkKind = o.optString("networkKind", "any"), networkSubnet = o.optString("networkSubnet"),
             followParentLinks = o.optBoolean("followParentLinks"),
             serverCopies = o.optBoolean("serverCopies", true), disconnectMinutes = o.optInt("disconnectMinutes", 5),
-            writeMode = o.optString("writeMode", "local"),
+            writeMode = o.optString("writeMode", "proxy"),
+            logEnabled = o.optBoolean("logEnabled", true), logLevel = o.optString("logLevel", "info"),
         ).let { server ->
             // Before, QUIC servers kept the gateway (host:port) apart from nfsd's host and port.
             val gateway = o.optString("gateway").takeIf { server.transport == "quic" && it.isNotBlank() } ?: return@let server

@@ -5,6 +5,8 @@ import android.net.ConnectivityManager
 import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
+import io.github.nfsandroid.log.LogCategory
+import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -28,18 +30,18 @@ object NetworkMonitor {
                 val kind = describe(connectivity.getNetworkCapabilities(network))
                 state.value = "$kind (${link.interfaceName})"
                 if (previous != null && previous != current) {
-                    NfsLog.line("network changed: $kind, ${link.interfaceName}")
+                    NfsLog.log(LogLevel.INFO, LogCategory.NETWORK, null, "changed", "kind" to kind, "interface" to link.interfaceName)
                     Mounts.networkChanged()
                 }
             }
 
             override fun onLost(network: Network) {
                 if (current?.first == network) state.value = "—"
-                NfsLog.line("network lost")
+                NfsLog.log(LogLevel.WARN, LogCategory.NETWORK, null, "lost")
             }
 
             override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
-                NfsLog.line(if (blocked) "Android blocks the app's network" else "Android allows the app's network again")
+                NfsLog.log(if (blocked) LogLevel.WARN else LogLevel.INFO, LogCategory.NETWORK, null, if (blocked) "blocked by Android" else "allowed again")
                 state.value = state.value.substringBefore(" · ") + if (blocked) " · blocked" else ""
             }
         })

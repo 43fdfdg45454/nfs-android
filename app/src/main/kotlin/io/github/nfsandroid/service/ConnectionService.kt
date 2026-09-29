@@ -9,6 +9,8 @@ import android.content.pm.ServiceInfo
 import android.os.PowerManager
 import io.github.nfsandroid.R
 import io.github.nfsandroid.core.Live
+import io.github.nfsandroid.log.LogCategory
+import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
 
 /**
@@ -48,7 +50,7 @@ class ConnectionService : Service() {
         fun start(context: Context) {
             if (running) return
             runCatching { context.startForegroundService(Intent(context, ConnectionService::class.java)) }
-                .onFailure { NfsLog.line("foreground service refused: ${it.message}") }
+                .onFailure { NfsLog.log(LogLevel.ERROR, LogCategory.SERVICE, null, "refused by Android", "error" to NfsLog.reason(it)) }
         }
 
         private var posted: Pair<Int, Triple<String, String, String>>? = null

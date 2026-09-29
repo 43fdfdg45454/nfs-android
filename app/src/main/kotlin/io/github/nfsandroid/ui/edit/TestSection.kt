@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import io.github.nfsandroid.R
 import io.github.nfsandroid.core.Connector
 import io.github.nfsandroid.data.Server
+import io.github.nfsandroid.log.LogCategory
+import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
 import io.github.nfsandroid.ui.common.Format
 import io.github.nfsandroid.ui.common.Section
@@ -82,5 +84,8 @@ private suspend fun test(context: Context, server: Server): Result<String> = wit
         } finally {
             mount.disconnect()
         }
-    }.also { NfsLog.line("test of ${server.title}: ${it.getOrElse { e -> e.message }}") }
+    }.also { result ->
+        result.onSuccess { NfsLog.log(LogLevel.INFO, LogCategory.TEST, server, "passed", "result" to it) }
+            .onFailure { NfsLog.log(LogLevel.ERROR, LogCategory.TEST, server, "failed", "error" to NfsLog.reason(it)) }
+    }
 }
