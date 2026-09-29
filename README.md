@@ -32,13 +32,18 @@ Tap **Add server**. Each section of the form explains its options:
 - **Network**: any, or only a VPN or a Wi-Fi, optionally the one that gives the phone an address in
   a subnet ("Use current" fills it in). Without that network the server fails at once instead of
   making apps wait.
-- **Security**: none, TLS or mTLS, as the export's `xprtsec` asks. The client certificate is a
-  `.p12` installed in Settings › Security › Encryption & credentials › Install a certificate; its
-  key never leaves Android's key store. The gateway always asks for one.
+- **Security**: none, TLS or mTLS, as the export's `xprtsec` asks. With mTLS, the certificate for
+  nfsd: a `.p12` installed in Settings › Security › Encryption & credentials › Install a
+  certificate; its key never leaves Android's key store. Over QUIC, the connection section has the
+  gateway's own security: TLS (the tunnel is always encrypted and the gateway's certificate
+  checked) or mTLS (by default; the gateway also asks for a certificate, even when the export uses
+  no TLS), with its certificate apart from nfsd's (it may be the same).
 - **Identity**: the UID/GID your files belong to on the server (with `all_squash` it does not
   matter), and the permissions of what you create: standard (644, folders 755), group (664, 775),
   private (600, 700) or any umask.
-- **Performance**: connections, read-ahead (256 MB by default) and the local cache.
+- **Performance**: connections, read-ahead (256 MB by default), the local cache, and caps on
+  downloads and uploads (an amount in kb/s, Mb/s, kB/s or MB/s; 0: none) across all of the
+  server's connections.
 - **Advanced**: edge cases, with sensible defaults. Following symbolic links to their own folder
   or one above it (off: apps that go through whole folders would loop through them); copies made
   by the server (on; off, the file manager copies through the phone, with progress); disconnecting

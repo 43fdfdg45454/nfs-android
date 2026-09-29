@@ -12,10 +12,10 @@ crate-type = ["cdylib", "lib"]
 
 # nfs-core at a fixed commit: move it forward on purpose, after its CI is green.
 [dependencies]
-nfs-client = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "aaaf3691f4c6dd3ec72441812d25fa02c3e48555" }
-nfs-engine = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "aaaf3691f4c6dd3ec72441812d25fa02c3e48555" }
-nfs-rpc = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "aaaf3691f4c6dd3ec72441812d25fa02c3e48555" }
-nfs-tunnel = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "aaaf3691f4c6dd3ec72441812d25fa02c3e48555" }
+nfs-client = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "e2f0be67b03e96d1ed9752a2c230358271ee258a" }
+nfs-engine = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "e2f0be67b03e96d1ed9752a2c230358271ee258a" }
+nfs-rpc = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "e2f0be67b03e96d1ed9752a2c230358271ee258a" }
+nfs-tunnel = { git = "https://github.com/43fdfdg45454/nfs-core", rev = "e2f0be67b03e96d1ed9752a2c230358271ee258a" }
 # TLS 1.3 only, as nfs-core: no TLS 1.2 code in the app.
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "logging"] }
 tokio = { version = "1", features = ["full"] }

@@ -38,6 +38,9 @@ pub struct Server {
     pub connections: u32,
     pub read_ahead_mb: u32,
     pub use_cache: bool,
+    /// Bytes per second up and down, across all of the server's connections (0: no cap).
+    pub up_limit: u64,
+    pub down_limit: u64,
 }
 
 #[derive(uniffi::Enum)]

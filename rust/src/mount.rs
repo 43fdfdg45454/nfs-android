@@ -32,16 +32,20 @@ pub(crate) fn split(path: &str) -> Result<(&str, &str)> {
 
 #[uniffi::export(async_runtime = "tokio")]
 impl Mount {
-    /// `roots`: the CA certificates the app trusts (DER). `cache_bytes` 0 turns the disk cache off.
+    /// `roots`: the CA certificates the app trusts (DER). `identity`: the client certificate for
+    /// nfsd (mutual TLS); `gateway_identity`: the one for the gateway (QUIC). `cache_bytes` 0 turns
+    /// the disk cache off.
     #[uniffi::constructor]
     pub async fn connect(
         server: Server,
         roots: Vec<Vec<u8>>,
         identity: Option<Arc<dyn Identity>>,
+        gateway_identity: Option<Arc<dyn Identity>>,
         cache_dir: String,
         cache_bytes: u64,
     ) -> Result<Arc<Self>> {
-        let config = crate::config::config(&server, &roots, identity.as_ref()).await?;
+        let (nfsd, gateway) = (identity.as_ref(), gateway_identity.as_ref());
+        let config = crate::config::config(&server, &roots, nfsd, gateway).await?;
         let client = Client::connect(config, &server.export).await?;
         let cache = server.use_cache.then(|| crate::cache::get(&cache_dir, cache_bytes)).flatten();
         let read_ahead = u64::from(server.read_ahead_mb.clamp(16, 1024)) << 20;

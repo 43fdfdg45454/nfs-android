@@ -64,10 +64,17 @@
     <string name="none_help_quic">El túnel hasta el gateway va cifrado igual; nfsd no ve TLS.</string>
     <string name="tls_help">Cifrado, y el certificado de nfsd se verifica contra el nombre del servidor.</string>
     <string name="mtls_help">Como TLS, y además el teléfono se identifica con su certificado (xprtsec=mtls).</string>
-    <string name="certificate">Certificado de cliente</string>
+    <string name="certificate">Certificado para nfsd</string>
     <string name="certificate_none">Ninguno elegido</string>
     <string name="certificate_help">Del almacén de claves de Android: instalá el .p12 en Ajustes › Seguridad. La clave nunca sale de ahí.</string>
-    <string name="certificate_help_quic">El gateway lo pide siempre; con mTLS, también nfsd. Sale del almacén de claves de Android y la clave nunca sale de ahí.</string>
+    <string name="gateway_security">Seguridad del gateway</string>
+    <string name="gateway_tls_help">El túnel va siempre cifrado (QUIC) y el certificado del gateway se verifica contra su nombre; el teléfono no presenta ninguno, para un gateway que corre con --no-client-auth.</string>
+    <string name="gateway_mtls_help">Como TLS, y el teléfono demuestra quién es con un certificado de la CA del gateway: lo que el gateway pide por defecto, aunque el export no use TLS.</string>
+    <string name="gateway_certificate">Certificado para el gateway</string>
+    <string name="gateway_certificate_help">Aparte del de nfsd; puede ser el mismo. Sale del almacén de claves de Android y la clave nunca sale de ahí.</string>
+    <string name="down_limit">Límite de bajada</string>
+    <string name="up_limit">Límite de subida</string>
+    <string name="rate_help">0: sin límite. Entre todas las conexiones de este servidor, cifrado incluido; k = 1000 (kb: bits, kB: bytes). Por debajo de la tasa de un video, se corta.</string>
     <string name="choose">Elegir</string>
     <string name="change">Cambiar</string>
     <string name="section_identity">Identidad</string>

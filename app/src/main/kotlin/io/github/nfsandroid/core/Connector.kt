@@ -1,6 +1,7 @@
 package io.github.nfsandroid.core
 
 import android.content.Context
+import io.github.nfsandroid.data.Rates
 import io.github.nfsandroid.data.Server
 import io.github.nfsandroid.data.Settings
 import uniffi.nfscore.Mount
@@ -19,10 +20,14 @@ object Connector {
             umask = server.umask.toUInt(), followParentLinks = server.followParentLinks,
             owner = "${installation(context)}-${server.id}", connections = server.connections.toUInt(),
             readAheadMb = server.readAheadMb.toUInt(), useCache = server.useCache,
+            upLimit = Rates.bytes(server.upLimit, server.upUnit).toULong(),
+            downLimit = Rates.bytes(server.downLimit, server.downUnit).toULong(),
         )
-        val identity = server.certificateAlias.takeIf { it.isNotBlank() }?.let { KeyChainIdentity(context, it) }
+        // Each its own: nfsd's with mutual TLS, the gateway's over QUIC with mutual TLS.
+        val identity = server.certificateAlias.takeIf { server.security == "mtls" && it.isNotBlank() }?.let { KeyChainIdentity(context, it) }
+        val gateway = server.gatewayCertificateAlias.takeIf { server.transport == "quic" && server.gatewaySecurity == "mtls" && it.isNotBlank() }?.let { KeyChainIdentity(context, it) }
         val cacheBytes = Settings.cacheGb(context).toLong() shl 30
-        return Mount.connect(core, Trust.roots(), identity, Settings.cacheDir(context), cacheBytes.toULong())
+        return Mount.connect(core, Trust.roots(), identity, gateway, Settings.cacheDir(context), cacheBytes.toULong())
     }
 
     /** Names this installation to servers, for good. */

@@ -65,10 +65,17 @@
     <string name="none_help_quic">The tunnel to the gateway is encrypted anyway; nfsd sees no TLS.</string>
     <string name="tls_help">Encrypted, and nfsd\'s certificate is checked against the server\'s name.</string>
     <string name="mtls_help">As TLS, and the phone proves who it is with its certificate (xprtsec=mtls).</string>
-    <string name="certificate">Client certificate</string>
+    <string name="certificate">Certificate for nfsd</string>
     <string name="certificate_none">None chosen</string>
     <string name="certificate_help">From Android\'s key store: install the .p12 in Settings › Security. The key never leaves it.</string>
-    <string name="certificate_help_quic">The gateway always asks for one; with mTLS, nfsd too. From Android\'s key store: the key never leaves it.</string>
+    <string name="gateway_security">Gateway security</string>
+    <string name="gateway_tls_help">The tunnel is always encrypted (QUIC) and the gateway\'s certificate checked against its name; the phone presents none, for a gateway run with --no-client-auth.</string>
+    <string name="gateway_mtls_help">As TLS, and the phone proves who it is with a certificate of the gateway\'s CA: the gateway\'s default, even when the export uses no TLS.</string>
+    <string name="gateway_certificate">Certificate for the gateway</string>
+    <string name="gateway_certificate_help">Apart from nfsd\'s; it may be the same. From Android\'s key store: the key never leaves it.</string>
+    <string name="down_limit">Download limit</string>
+    <string name="up_limit">Upload limit</string>
+    <string name="rate_help">0: no limit. Across all of this server\'s connections, encryption included; k = 1000 (kb: bits, kB: bytes). Under a video\'s bitrate, it stutters.</string>
     <string name="choose">Choose</string>
     <string name="change">Change</string>
     <string name="section_identity">Identity</string>

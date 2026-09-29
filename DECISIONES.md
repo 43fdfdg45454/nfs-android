@@ -133,3 +133,11 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     proxy-edit, proxy-low-space) y en qué se fue el tiempo (writing, core, closing); cada
     miniatura, lo que leyó (aviso si tarda más de 2 s o no se puede hacer). Los errores van con su
     mensaje, no con el nombre de la clase (el release lo acorta).
+37. **Seguridad del gateway aparte de la de nfsd** (Conexión, solo con QUIC): TLS o mTLS (por
+    defecto, lo que pide el gateway), cada una con su certificado: el túnel pide uno aunque el export
+    no use TLS. Sin "Ninguna": QUIC siempre cifra y el certificado del gateway siempre se verifica
+    (no hacerlo lo dejaría suplantar). Los servidores QUIC guardados antes quedan en mTLS con su
+    certificado, que pasa a ser también el del gateway.
+38. **Límites de bajada y subida por servidor** (Rendimiento): cantidad (0: sin límite) y unidad
+    (kb/s, Mb/s, kB/s, MB/s; k = 1000), guardadas como se escribieron; el núcleo los aplica a todas
+    las conexiones del servidor (`Config.rate`). `RateTest`: con 2 MB/s, 8 MiB no llegan antes.

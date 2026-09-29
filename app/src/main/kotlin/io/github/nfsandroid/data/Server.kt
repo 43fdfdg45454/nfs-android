@@ -16,6 +16,9 @@ data class Server(
     /** "none", "tls" or "mtls" (with the KeyChain certificate [certificateAlias]). */
     val security: String = "none",
     val certificateAlias: String = "",
+    /** Over QUIC: "mtls" (the gateway asks for [gatewayCertificateAlias], apart from nfsd's) or "tls". */
+    val gatewaySecurity: String = "mtls",
+    val gatewayCertificateAlias: String = "",
     val uid: Int = 0,
     val gid: Int = 0,
     val gids: List<Int> = emptyList(),
@@ -25,6 +28,11 @@ data class Server(
     val connections: Int = 0,
     val readAheadMb: Int = 256,
     val useCache: Boolean = true,
+    /** Caps on the transfer each way, as typed: an amount (0: none) in one of [Rates.UNITS]. */
+    val downLimit: Int = 0,
+    val downUnit: String = "Mbps",
+    val upLimit: Int = 0,
+    val upUnit: String = "Mbps",
     val readOnly: Boolean = false,
     /** Off: kept with its settings, but out of the file pickers and never connected. */
     val enabled: Boolean = true,
@@ -52,7 +60,9 @@ data class Server(
         put("useCache", useCache); put("readOnly", readOnly); put("enabled", enabled)
         put("networkKind", networkKind); put("networkSubnet", networkSubnet); put("followParentLinks", followParentLinks)
         put("serverCopies", serverCopies); put("disconnectMinutes", disconnectMinutes); put("writeMode", writeMode)
-        put("logEnabled", logEnabled); put("logLevel", logLevel)
+        put("logEnabled", logEnabled); put("logLevel", logLevel); put("gatewaySecurity", gatewaySecurity)
+        put("gatewayCertificateAlias", gatewayCertificateAlias)
+        put("downLimit", downLimit); put("downUnit", downUnit); put("upLimit", upLimit); put("upUnit", upUnit)
     }
 
     val title get() = name.ifBlank { host }
@@ -82,6 +92,12 @@ data class Server(
             serverCopies = o.optBoolean("serverCopies", true), disconnectMinutes = o.optInt("disconnectMinutes", 5),
             writeMode = o.optString("writeMode", "proxy"),
             logEnabled = o.optBoolean("logEnabled", true), logLevel = o.optString("logLevel", "info"),
+            // Before, one certificate went to the gateway and to nfsd: a QUIC server keeps it for both.
+            gatewaySecurity = o.optString("gatewaySecurity", "mtls"),
+            gatewayCertificateAlias = if (o.has("gatewayCertificateAlias")) o.getString("gatewayCertificateAlias")
+            else o.optString("certificateAlias").takeIf { o.optString("transport") == "quic" }.orEmpty(),
+            downLimit = o.optInt("downLimit"), downUnit = o.optString("downUnit", "Mbps"),
+            upLimit = o.optInt("upLimit"), upUnit = o.optString("upUnit", "Mbps"),
         ).let { server ->
             // Before, QUIC servers kept the gateway (host:port) apart from nfsd's host and port.
             val gateway = o.optString("gateway").takeIf { server.transport == "quic" && it.isNotBlank() } ?: return@let server

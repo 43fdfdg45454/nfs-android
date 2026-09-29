@@ -39,6 +39,7 @@ fun ConnectionSection(s: Server, problems: Problems, onChange: (Server) -> Unit)
             }
         }
         Help(stringResource(if (s.transport == "quic") R.string.host_help_quic else R.string.host_help_tcp))
+        if (s.transport == "quic") GatewaySecurity(s, onChange)
         TextInput(
             stringResource(R.string.export), s.export, help = stringResource(R.string.export_help),
             error = problems.export?.let { stringResource(it) }, keyboard = KeyboardType.Uri,

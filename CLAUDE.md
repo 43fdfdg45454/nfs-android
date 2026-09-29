@@ -57,7 +57,7 @@ etapa 2 está estable.
   ruta real con un usuario común, borrar o copiar un enlace conserva su destino; árboles de
   `ci/links.sh`) y subidas con escrituras de 8 KiB por una copia local y por el proxy, y lo que una
   app reescribe o acorta antes de cerrar (`UploadTest`, con la línea de cada subida en el log),
-  y el formato y los niveles del log (`LogTest`). Resultados por logcat (`nfs-test`) a una
+  el formato y los niveles del log (`LogTest`) y los límites de bajada y subida (`RateTest`). Resultados por logcat (`nfs-test`) a una
   anotación por grupo.
 - Seguridad (`security.yml`, en cada push y a diario): `cargo deny` sobre `rust/`, secretos en el
   historial (`ci/secrets.sh`), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions); los

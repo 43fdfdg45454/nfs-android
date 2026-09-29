@@ -10,10 +10,13 @@ use std::sync::Arc;
 
 const NFS_PORT: u16 = 2049;
 
+/// `identity` and `gateway_identity`: the client certificates for nfsd (mutual TLS) and for the
+/// gateway (QUIC), each its own: the tunnel may ask for one where the export asks for none.
 pub async fn config(
     server: &Server,
     roots: &[Vec<u8>],
     identity: Option<&Arc<dyn Identity>>,
+    gateway_identity: Option<&Arc<dyn Identity>>,
 ) -> Result<Config> {
     // A name or an address; an IPv6 address may come in brackets or not.
     let host = server.host.trim_matches(['[', ']']);
@@ -31,7 +34,7 @@ pub async fn config(
     let transport = match &server.transport {
         Transport::Tcp => nfs_client::Transport::Tcp(address(host, server.port)),
         Transport::Quic => {
-            let mut outer = tls(roots, identity)?;
+            let mut outer = tls(roots, gateway_identity)?;
             outer.alpn_protocols = vec![b"h3".to_vec()];
             let endpoint = nfs_tunnel::quic::client(outer, Default::default()).map_err(other)?;
             nfs_client::Transport::Quic(Arc::new(Tunnel {
@@ -53,6 +56,7 @@ pub async fn config(
     };
     let mut config = Config::new(transport, security, Auth::Sys(cred), server.owner.clone());
     config.umask = server.umask;
+    config.rate = nfs_client::Rate::new(server.up_limit, server.down_limit);
     if server.connections > 0 {
         config.connections = server.connections as usize;
     }
