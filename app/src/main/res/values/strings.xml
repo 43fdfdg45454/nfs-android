@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">NFS</string>
     <string name="channel_connection">NFS connection</string>
-    <string name="channel_uploads">Uploads</string>
+    <string name="channel_upload_progress">Uploads under way</string>
+    <string name="channel_upload_failed">Uploads that failed</string>
     <string name="upload_progress">%1$s of %2$s uploaded</string>
     <string name="upload_failed">Not uploaded: %1$s. The file on the server is incomplete; copy it again.</string>
     <string name="channel_connection_help">Shown while servers are connected: Android needs it to let players reach them from the background.</string>

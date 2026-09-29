@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="channel_connection">Conexión NFS</string>
-    <string name="channel_uploads">Subidas</string>
+    <string name="channel_upload_progress">Subidas en curso</string>
+    <string name="channel_upload_failed">Subidas fallidas</string>
     <string name="upload_progress">%1$s de %2$s subidos</string>
     <string name="upload_failed">No se subió: %1$s. El archivo en el servidor quedó incompleto; copialo de nuevo.</string>
     <string name="channel_connection_help">Visible mientras haya servidores conectados: Android la necesita para que los reproductores los alcancen en segundo plano.</string>

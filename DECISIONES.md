@@ -113,7 +113,7 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     cuesta ~1 ms por escritura (6-7 MB/s con escrituras de 8 KiB por una Wi-Fi de ~37 MB/s). La
     copia es solo caché: nadie más la abre, se borra al terminar (y al arrancar, lo que quedó), y el
     documento no se abre de nuevo ni tiene miniatura hasta que la subida termina. Con menos de 1 GB
-    libre, proxy. Progreso y errores en una notificación (canal "Subidas"); una línea por subida en
-    el log. Los archivos editados en el lugar ("rw", "wa") siguen por el proxy.
+    libre, proxy. Progreso y errores en notificaciones (canales "Subidas en curso", silencioso, y
+    "Subidas fallidas"); una línea por subida en el log. Los archivos editados en el lugar ("rw", "wa") siguen por el proxy.
 33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
     comparando las carpetas reales del camino (los handles), no los nombres.

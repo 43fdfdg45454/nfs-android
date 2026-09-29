@@ -23,7 +23,7 @@ object Staged {
     private val pending = ConcurrentHashMap<String, CountDownLatch>()
 
     /** Whether [document] is being uploaded. */
-    fun uploading(document: String) = document in pending
+    fun uploading(document: String) = pending.containsKey(document)
 
     /** Waits up to [ms] for [document]'s upload to end; whether it did. */
     fun await(document: String, ms: Long) = pending[document]?.await(ms, TimeUnit.MILLISECONDS) ?: true

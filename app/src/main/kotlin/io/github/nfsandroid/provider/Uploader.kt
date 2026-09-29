@@ -38,9 +38,9 @@ class Uploader(
                     UploadNotice.progress(context, path, sent, copy.length())
                 }
                 val size = copy.length()
-                for ((block, digest) in digests.toList()) {
+                for ((block, sum) in digests.toList()) {
                     val at = block * BLOCK
-                    if (at < size && !digest(read(copy, at, minOf(BLOCK.toLong(), size - at).toInt())).contentEquals(digest)) {
+                    if (at < size && !digest(read(copy, at, minOf(BLOCK.toLong(), size - at).toInt())).contentEquals(sum)) {
                         send(copy, at, minOf(BLOCK.toLong(), size - at).toInt(), keep = false)
                     }
                 }
