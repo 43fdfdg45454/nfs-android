@@ -15,38 +15,31 @@ pub async fn config(
     roots: &[Vec<u8>],
     identity: Option<&Arc<dyn Identity>>,
 ) -> Result<Config> {
+    // A name or an address; an IPv6 address may come in brackets or not.
+    let host = server.host.trim_matches(['[', ']']);
     let security = match server.security {
         Security::None => nfs_client::Security::None,
-        Security::Tls => nfs_client::Security::tls(tls(roots, None)?, &server.host)?,
+        Security::Tls => nfs_client::Security::tls(tls(roots, None)?, host)?,
         Security::MutualTls => {
             let identity =
                 identity.ok_or_else(|| other("mutual TLS needs a client certificate"))?;
-            nfs_client::Security::tls(tls(roots, Some(identity))?, &server.host)?
+            nfs_client::Security::tls(tls(roots, Some(identity))?, host)?
         }
     };
+    // Both transports reach the server the same way: the core looks the name up at each new
+    // connection (within its reach timeout) and tries the addresses in turn.
     let transport = match &server.transport {
-        Transport::Tcp => nfs_client::Transport::Tcp(format!("{}:{}", server.host, server.port)),
+        Transport::Tcp => nfs_client::Transport::Tcp(address(host, server.port)),
         Transport::Quic => {
             let mut outer = tls(roots, identity)?;
             outer.alpn_protocols = vec![b"h3".to_vec()];
             let endpoint = nfs_tunnel::quic::client(outer, Default::default()).map_err(other)?;
-            let host = server.host.trim_matches(['[', ']']);
-            // As the core does for TCP: nobody answering (the name included) shows in 4 s.
-            let lookup = tokio::net::lookup_host((host, server.port));
-            let address = tokio::time::timeout(std::time::Duration::from_secs(4), lookup)
-                .await
-                .map_err(|_| other(format!("{host}: no answer to the name lookup")))?
-                .map_err(other)?
-                .next();
             nfs_client::Transport::Quic(Arc::new(Tunnel {
                 endpoint,
-                gateway: address.ok_or_else(|| other(format!("{host} does not resolve")))?,
+                gateway: address(host, server.port),
                 server_name: host.to_owned(),
                 // Required by CONNECT, ignored by the gateway: it always goes to nfsd by itself.
-                authority: match host.contains(':') {
-                    true => format!("[{host}]:{NFS_PORT}"),
-                    false => format!("{host}:{NFS_PORT}"),
-                },
+                authority: address(host, NFS_PORT),
                 header: None,
                 send_request: Default::default(),
             }))
@@ -64,4 +57,12 @@ pub async fn config(
         config.connections = server.connections as usize;
     }
     Ok(config)
+}
+
+/// `host:port`, with an IPv6 address in brackets.
+fn address(host: &str, port: u16) -> String {
+    match host.contains(':') {
+        true => format!("[{host}]:{port}"),
+        false => format!("{host}:{port}"),
+    }
 }
