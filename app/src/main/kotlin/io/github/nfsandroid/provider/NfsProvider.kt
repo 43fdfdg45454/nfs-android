@@ -1,5 +1,6 @@
 package io.github.nfsandroid.provider
 
+import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.os.CancellationSignal
@@ -88,8 +89,13 @@ class NfsProvider : DocumentsProvider() {
         }
     }
 
-    override fun openDocumentThumbnail(id: String, size: android.graphics.Point, signal: CancellationSignal?) = nfs(id) { mount, path, _ ->
-        if (Staged.uploading(id)) throw FileNotFoundException("$path: still being uploaded")
+    override fun openDocumentThumbnail(id: String, size: android.graphics.Point, signal: CancellationSignal?): AssetFileDescriptor {
+        // Made from the whole file: once its upload ends.
+        if (!Staged.await(id, CALL_MS)) throw FileNotFoundException("$id: still being uploaded")
+        return thumbnail(id, size)
+    }
+
+    private fun thumbnail(id: String, size: android.graphics.Point) = nfs(id) { mount, path, _ ->
         val stat = mount.stat(path)
         val key = "$id:${stat.modified}:${stat.size}"
         Thumbnails.get(context!!, key, Documents.mime(stat), size) { runBlocking { mount.read(path) } }

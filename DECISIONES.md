@@ -105,6 +105,8 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     carpetas); copias en el servidor (encendido; apagado, el gestor copia con progreso); desconectar
     sin uso a los 1, 5 (por defecto), 15 o 60 minutos, o nunca; escritura de archivos (copia local
     por defecto, o proxy).
+33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
+    comparando las carpetas reales del camino (los handles), no los nombres.
 34. **Archivos escritos enteros ("w", "wt"), por una copia local** (por defecto; o por el proxy, en
     Avanzados): la app recibe un archivo real en la caché privada (velocidad de disco, moverse,
     fsync), que se sube por bloques de 1 MiB mientras crece y se termina al cerrarlo. Los bloques
@@ -114,6 +116,10 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     copia es solo caché: nadie más la abre, se borra al terminar (y al arrancar, lo que quedó), y el
     documento no se abre de nuevo ni tiene miniatura hasta que la subida termina. Con menos de 1 GB
     libre, proxy. Progreso y errores en notificaciones (canales "Subidas en curso", silencioso, y
-    "Subidas fallidas"); una línea por subida en el log. Los archivos editados en el lugar ("rw", "wa") siguen por el proxy.
-33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
-    comparando las carpetas reales del camino (los handles), no los nombres.
+    "Subidas fallidas"); una línea por subida en el log. Los archivos editados en el lugar ("rw",
+    "wa") siguen por el proxy.
+35. **Pruebas del emulador en grupos a la vez** (`ci/shards.txt`, un emulador por grupo): cada uno
+    arranca de un snapshot en caché, compila los APK mientras arrancan nfsd y el emulador, y corre
+    sus clases con `am instrument`, sin Gradle adentro. `ci/shards.sh` exige que cada clase esté en
+    un solo grupo y que los grupos sean la matriz del job. El núcleo se compila por partes a la vez
+    (x86_64, bindings, arm64-v8a); el emulador espera solo las dos primeras.

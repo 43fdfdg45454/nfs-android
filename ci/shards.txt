@@ -1,0 +1,6 @@
+# The emulator's tests in groups run at once, one emulator each (ci/emulator.sh <group>): the
+# scenarios alone, as they take longest. Every test class is in exactly one (ci/shards.sh).
+scenarios ScenariosTest
+uploads UploadTest TransfersTest
+modes ModesTest WatchTest ProviderTest
+links LinksTest LinkEscapesTest LinkRightsTest

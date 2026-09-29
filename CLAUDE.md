@@ -37,21 +37,26 @@ etapa 2 está estable.
   (Compose), `log` (`nfs-log.txt`, `crash-log.txt`).
 - `rust/` (nfs-ffi): el puente al núcleo con UniFFI (montaje, archivos, identidad de KeyChain con
   firma delegada). Depende de nfs-core por git a un commit fijo (`rev` en `rust/Cargo.toml`): se
-  adelanta a propósito, con la CI de nfs-core en verde. `ci/core.sh` compila `libnfscore.so`
-  (cargo-ndk, arm64-v8a y x86_64) y genera los bindings de Kotlin en el módulo `:core`.
+  adelanta a propósito, con la CI de nfs-core en verde. `ci/core.sh <parte>` compila `libnfscore.so`
+  (cargo-ndk, `arm64-v8a` o `x86_64`) o genera los bindings de Kotlin (`bindings`) en `:core`;
+  en la CI, cada parte en su runner a la vez.
 - Versiones con GitVersion (`GitVersion.yml`, `ci/version.sh`): cada commit en `master` es un parche
   más desde la última etiqueta `v*`; `+semver: minor` o `+semver: major` en el mensaje suben más.
   Cada push a `master` con la CI en verde publica un release de GitHub con el APK (`ci/release.sh`).
 - CI: privacidad, núcleo (fmt, clippy, `.so` y bindings), compilación (APK `NFS-<versión>.apk`) y
-  emulador (API 34) contra nfsd del runner con los scripts y fixtures de nfs-core. Las pruebas usan
-  el provider por `ContentResolver` como otra app: lo básico (`ProviderTest`), los escenarios del
-  motor por el proxy de archivos con el reproductor estricto (`ScenariosTest`, tiempos informados)
-  modos de apertura, miniaturas y caché (`ModesTest`), avisos de cambios de otro cliente
-  (`WatchTest`), copiar y mover en el servidor sin tráfico (`TransfersTest`), enlaces simbólicos
-  y rutas (`LinksTest`), seguridad de los enlaces (`LinkEscapesTest`: nada fuera del export ni en
-  bucle; `LinkRightsTest`: permisos como por la ruta real con un usuario común, borrar o copiar un
-  enlace conserva su destino; árboles de `ci/links.sh`) y subidas con escrituras de 8 KiB por una copia local
-  y por el proxy, y lo que una app reescribe o acorta antes de cerrar (`UploadTest`). Resultados por logcat (`nfs-test`) a una anotación.
+  emulador (API 34, desde un snapshot en caché) contra nfsd del runner con los scripts y fixtures
+  de nfs-core: un emulador por grupo de clases de `ci/shards.txt` a la vez (`ci/shards.sh` exige
+  cada clase en un solo grupo), APK compilados mientras arranca y `am instrument` sin Gradle
+  (`ci/emulator.sh <grupo>`). Las pruebas usan el provider por `ContentResolver` como otra app: lo
+  básico (`ProviderTest`), los escenarios del motor por el proxy de archivos con el reproductor
+  estricto (`ScenariosTest`, tiempos informados), modos de apertura, miniaturas y caché
+  (`ModesTest`), avisos de cambios de otro cliente (`WatchTest`), copiar y mover en el servidor sin
+  tráfico (`TransfersTest`), enlaces simbólicos y rutas (`LinksTest`), seguridad de los enlaces
+  (`LinkEscapesTest`: nada fuera del export ni en bucle; `LinkRightsTest`: permisos como por la
+  ruta real con un usuario común, borrar o copiar un enlace conserva su destino; árboles de
+  `ci/links.sh`) y subidas con escrituras de 8 KiB por una copia local y por el proxy, y lo que una
+  app reescribe o acorta antes de cerrar (`UploadTest`). Resultados por logcat (`nfs-test`) a una
+  anotación por grupo.
 - Seguridad (`security.yml`, en cada push y a diario): `cargo deny` sobre `rust/`, secretos en el
   historial (`ci/secrets.sh`), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions); los
   chequeos de seguridad de Android lint son fatales en el release. Acciones fijadas por commit.
