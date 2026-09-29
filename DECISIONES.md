@@ -103,12 +103,17 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
 32. **Sección "Avanzados"** por servidor: casos borde con lo sensato por defecto. Seguir los
     enlaces a su propia carpeta o a una de más arriba (apagado: bucles para lo que recorre
     carpetas); copias en el servidor (encendido; apagado, el gestor copia con progreso); desconectar
-    sin uso a los 1, 5 (por defecto), 15 o 60 minutos, o nunca; escritura directa (gestores de
-    archivos por defecto, siempre o nunca).
-34. **Escritura directa por un tubo:** un archivo abierto para escribirse entero ("w", "wt") por
-    un gestor de archivos conocido (por el paquete que llama) recibe un tubo en vez del proxy de
-    archivos: medido en un teléfono, el proxy cuesta ~1,2 ms por escritura (6-7 MB/s con escrituras
-    de 8 KiB por una Wi-Fi que sube a ~37 MB/s). El tubo no permite moverse ni sincronizar: las
-    demás apps siguen con el proxy. Cada subida deja una línea en el log con su velocidad.
+    sin uso a los 1, 5 (por defecto), 15 o 60 minutos, o nunca; escritura de archivos (copia local
+    por defecto, o proxy).
+34. **Archivos escritos enteros ("w", "wt"), por una copia local** (por defecto; o por el proxy, en
+    Avanzados): la app recibe un archivo real en la caché privada (velocidad de disco, moverse,
+    fsync), que se sube por bloques de 1 MiB mientras crece y se termina al cerrarlo. Los bloques
+    subidos con el archivo abierto guardan su SHA-256; al cerrar, los que cambiaron (un encabezado
+    escrito al final) se suben de nuevo, y si la app lo acortó, se acorta en el servidor. El proxy
+    cuesta ~1 ms por escritura (6-7 MB/s con escrituras de 8 KiB por una Wi-Fi de ~37 MB/s). La
+    copia es solo caché: nadie más la abre, se borra al terminar (y al arrancar, lo que quedó), y el
+    documento no se abre de nuevo ni tiene miniatura hasta que la subida termina. Con menos de 1 GB
+    libre, proxy. Progreso y errores en una notificación (canal "Subidas"); una línea por subida en
+    el log. Los archivos editados en el lugar ("rw", "wa") siguen por el proxy.
 33. **Copiar una carpeta dentro de sí misma**, por su nombre o por un enlace, se rechaza
     comparando las carpetas reales del camino (los handles), no los nombres.

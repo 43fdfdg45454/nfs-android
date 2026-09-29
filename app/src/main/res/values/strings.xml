@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">NFS</string>
     <string name="channel_connection">NFS connection</string>
+    <string name="channel_uploads">Uploads</string>
+    <string name="upload_progress">%1$s of %2$s uploaded</string>
+    <string name="upload_failed">Not uploaded: %1$s. The file on the server is incomplete; copy it again.</string>
     <string name="channel_connection_help">Shown while servers are connected: Android needs it to let players reach them from the background.</string>
     <string name="notification_connecting">Connecting…</string>
     <string name="notification_title">↓ %1$s · ↑ %2$s</string>
@@ -92,11 +95,10 @@
     <string name="disconnect_after">Disconnect when unused</string>
     <string name="disconnect_after_help">Longer: opening something again does not wait to reconnect. Shorter: less battery, and the notification goes sooner. Never: connected until the server is turned off.</string>
     <string name="disconnect_never">Never</string>
-    <string name="pipe_writes">Direct writing</string>
-    <string name="pipe_managers">File managers</string>
-    <string name="pipe_always">Always</string>
-    <string name="pipe_never">Never</string>
-    <string name="pipe_writes_help">Files written whole go through a pipe, not Android\'s file proxy: several times faster uploads. A pipe cannot seek or sync: apps that do (video recorders) fail with it. By default, only for file managers.</string>
+    <string name="write_mode">Writing files</string>
+    <string name="write_local">Local copy + upload</string>
+    <string name="write_proxy">Proxy</string>
+    <string name="write_mode_help">Local copy: the app writes a real file on the phone at full speed, uploaded as it grows; it may finish before the upload does (its progress and any error show in a notification). Proxy: every write goes to the server through Android\'s file proxy, about 1 ms each: slow when apps write in small pieces, but the app knows when the server has it all. Edited files always use the proxy.</string>
     <string name="section_performance">Performance</string>
     <string name="section_performance_help">The defaults suit most links</string>
     <string name="connections">Connections</string>

@@ -21,7 +21,7 @@ import java.io.FileNotFoundException
 class NfsProvider : DocumentsProvider() {
     private val authority get() = "${context!!.packageName}.documents"
 
-    override fun onCreate() = true
+    override fun onCreate() = true.also { Staged.clean(context!!) }
 
     private fun <T> nfs(id: String, timeoutMs: Long = CALL_MS, block: suspend (uniffi.nfscore.Mount, String, io.github.nfsandroid.data.Server) -> T): T {
         val (serverId, path) = Documents.parse(id)
@@ -62,11 +62,12 @@ class NfsProvider : DocumentsProvider() {
         }
 
     override fun openDocument(id: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor {
-        val caller = callingPackage
-        return open(id, mode, caller)
+        // A file still being uploaded opens once it is whole on the server (close-to-open).
+        if (!Staged.await(id, CALL_MS)) throw FileNotFoundException("$id: still being uploaded")
+        return open(id, mode)
     }
 
-    private fun open(id: String, mode: String, caller: String?) = nfs(id) { mount, path, server ->
+    private fun open(id: String, mode: String) = nfs(id) { mount, path, server ->
         val storage = context!!.getSystemService(StorageManager::class.java)
         val truncate = 't' in mode
         // Whatever the mode, a writer this document still has finishes first (close-to-open).
@@ -74,7 +75,8 @@ class NfsProvider : DocumentsProvider() {
         when (mode) {
             "r" -> Proxies.read(storage, path, mount.read(path))
             "w", "wt" -> mount.create(path, exclusive = false).let { file ->
-                if (Pipes.suit(server, caller)) Pipes.write(id, path, file) else Proxies.write(storage, id, path, file)
+                if (server.writeMode == "local" && Staged.room(context!!)) Staged.write(context!!, server, id, path, file)
+                else Proxies.write(storage, id, path, file)
             }
             // In place: "rw" reads and writes, "rwt" empties it first, "wa" appends (the
             // descriptor starts at the end: the proxy does not know O_APPEND).
@@ -87,6 +89,7 @@ class NfsProvider : DocumentsProvider() {
     }
 
     override fun openDocumentThumbnail(id: String, size: android.graphics.Point, signal: CancellationSignal?) = nfs(id) { mount, path, _ ->
+        if (Staged.uploading(id)) throw FileNotFoundException("$path: still being uploaded")
         val stat = mount.stat(path)
         val key = "$id:${stat.modified}:${stat.size}"
         Thumbnails.get(context!!, key, Documents.mime(stat), size) { runBlocking { mount.read(path) } }

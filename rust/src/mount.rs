@@ -119,6 +119,14 @@ impl Mount {
         Ok(Arc::new(WriteFile::new(self.engine.write(&fh, true).await?)))
     }
 
+    /// Sets the file's size (what an app cut short after writing more).
+    pub async fn resize(&self, path: String, size: u64) -> Result<()> {
+        let fh = self.fh(&path).await?;
+        let attrs = SetAttrs { size: Some(size), ..Default::default() };
+        self.engine.client().setattr(&fh, &attrs).await?;
+        Ok(())
+    }
+
     /// The device changed networks: connections are made anew now, on the new one.
     pub async fn network_changed(&self) {
         self.engine.client().network_changed().await;

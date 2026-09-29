@@ -26,10 +26,10 @@ fun AdvancedSection(s: Server, onChange: (Server) -> Unit) =
         SwitchRow(stringResource(R.string.server_copies), stringResource(R.string.server_copies_help), s.serverCopies) {
             onChange(s.copy(serverCopies = it))
         }
-        Text(stringResource(R.string.pipe_writes), style = MaterialTheme.typography.bodyLarge)
-        val ways = listOf("managers" to R.string.pipe_managers, "always" to R.string.pipe_always, "never" to R.string.pipe_never)
-        Segmented(ways.map { (value, label) -> value to stringResource(label) }, s.pipeWrites) { onChange(s.copy(pipeWrites = it)) }
-        Help(stringResource(R.string.pipe_writes_help))
+        Text(stringResource(R.string.write_mode), style = MaterialTheme.typography.bodyLarge)
+        val ways = listOf("local" to R.string.write_local, "proxy" to R.string.write_proxy)
+        Segmented(ways.map { (value, label) -> value to stringResource(label) }, s.writeMode) { onChange(s.copy(writeMode = it)) }
+        Help(stringResource(R.string.write_mode_help))
         Text(stringResource(R.string.disconnect_after), style = MaterialTheme.typography.bodyLarge)
         val never = stringResource(R.string.disconnect_never)
         Segmented(DISCONNECT_MINUTES.map { it to if (it == 0) never else if (it < 60) "$it min" else "${it / 60} h" }, s.disconnectMinutes) {

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="channel_connection">Conexión NFS</string>
+    <string name="channel_uploads">Subidas</string>
+    <string name="upload_progress">%1$s de %2$s subidos</string>
+    <string name="upload_failed">No se subió: %1$s. El archivo en el servidor quedó incompleto; copialo de nuevo.</string>
     <string name="channel_connection_help">Visible mientras haya servidores conectados: Android la necesita para que los reproductores los alcancen en segundo plano.</string>
     <string name="notification_connecting">Conectando…</string>
     <string name="notification_title">↓ %1$s · ↑ %2$s</string>
@@ -91,11 +94,10 @@
     <string name="disconnect_after">Desconectar sin uso</string>
     <string name="disconnect_after_help">Más tiempo: volver a abrir algo no espera la reconexión. Menos: menos batería, y la notificación se va antes. Nunca: conectado hasta que se apague el servidor.</string>
     <string name="disconnect_never">Nunca</string>
-    <string name="pipe_writes">Escritura directa</string>
-    <string name="pipe_managers">Gestores de archivos</string>
-    <string name="pipe_always">Siempre</string>
-    <string name="pipe_never">Nunca</string>
-    <string name="pipe_writes_help">Los archivos que se escriben enteros van por un tubo, no por el proxy de archivos de Android: subidas varias veces más rápidas. Un tubo no permite moverse ni sincronizar: las apps que lo hacen (las que graban video) fallan con él. Por defecto, solo para gestores de archivos.</string>
+    <string name="write_mode">Escritura de archivos</string>
+    <string name="write_local">Copia local + subida</string>
+    <string name="write_proxy">Proxy</string>
+    <string name="write_mode_help">Copia local: la app escribe un archivo real en el teléfono a toda velocidad, que se sube mientras crece; puede terminar antes que la subida (el progreso y cualquier error se ven en una notificación). Proxy: cada escritura va al servidor por el proxy de archivos de Android, ~1 ms cada una: lento si la app escribe de a poco, pero la app sabe cuándo el servidor lo tiene todo. Los archivos que se editan usan siempre el proxy.</string>
     <string name="section_performance">Rendimiento</string>
     <string name="section_performance_help">Los valores por defecto sirven para la mayoría de los enlaces</string>
     <string name="connections">Conexiones</string>
