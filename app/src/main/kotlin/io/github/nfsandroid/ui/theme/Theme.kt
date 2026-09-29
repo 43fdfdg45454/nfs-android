@@ -7,7 +7,16 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import io.github.nfsandroid.data.Look
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +74,26 @@ private val typography = Typography().run {
     )
 }
 
-/** Light or dark as the system is. */
+/** Dark as the look says: always, never, or as the system is. */
 @Composable
-fun NfsTheme(content: @Composable () -> Unit) =
-    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) Dark else Light, shapes = shapes, typography = typography, content = content)
+fun Look.dark() = when (mode) {
+    "light" -> false
+    "dark" -> true
+    else -> isSystemInDarkTheme()
+}
+
+/** The app's look (Settings › Appearance): its colours, dark or not, and the text's size. */
+@Composable
+fun NfsTheme(content: @Composable () -> Unit) {
+    val look by Look.state.collectAsState()
+    val dark = look.dark()
+    val context = LocalContext.current
+    val scheme = when (look.palette) {
+        "wallpaper" -> if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        else -> Palettes.scheme(look.palette, if (dark) Dark else Light, dark)
+    }.let { if (dark && look.pureBlack) Palettes.black(it) else it }
+    val density = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(density.density, density.fontScale * look.textScale)) {
+        MaterialTheme(colorScheme = scheme, shapes = shapes, typography = typography, content = content)
+    }
+}

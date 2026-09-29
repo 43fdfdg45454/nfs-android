@@ -2,6 +2,7 @@ package io.github.nfsandroid
 
 import android.app.Application
 import io.github.nfsandroid.core.Mounts
+import io.github.nfsandroid.data.Look
 import io.github.nfsandroid.data.ServerStore
 import io.github.nfsandroid.log.CrashLog
 import io.github.nfsandroid.log.NfsLog
@@ -12,6 +13,7 @@ class NfsApp : Application() {
         super.onCreate()
         CrashLog.install(this)
         NfsLog.init(this)
+        Look.init(this)
         ServerStore.init(this)
         Mounts.init(this)
         io.github.nfsandroid.core.NetworkMonitor.init(this)

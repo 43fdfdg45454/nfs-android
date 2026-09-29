@@ -7,6 +7,19 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
@@ -57,30 +70,51 @@ fun App() {
     }
 }
 
+/**
+ * The tabs: upright, a bar below the screen; sideways (a phone on its side, a tablet), a rail
+ * beside it, and the screen clear of the system's bars and the camera's cutout.
+ */
 @Composable
-private fun Tabs(tab: Tab, onTab: (Tab) -> Unit, onEdit: (Server?) -> Unit) = Scaffold(bottomBar = {
-    NavigationBar {
-        Tab.entries.forEach { t ->
-            val icon = when (t) {
-                Tab.Servers -> painterResource(R.drawable.ic_servers)
-                Tab.Activity -> painterResource(R.drawable.ic_activity)
-                Tab.Settings -> rememberVectorPainter(Icons.Outlined.Settings)
+private fun Tabs(tab: Tab, onTab: (Tab) -> Unit, onEdit: (Server?) -> Unit) = BoxWithConstraints {
+    if (maxWidth >= 600.dp && maxWidth > maxHeight) {
+        val bars = WindowInsets.systemBars.union(WindowInsets.displayCutout)
+        Row {
+            NavigationRail(windowInsets = bars.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start)) {
+                Tab.entries.forEach { t ->
+                    NavigationRailItem(tab == t, { onTab(t) }, icon = { Icon(t.icon(), null) }, label = { Text(stringResource(t.label)) })
+                }
             }
-            NavigationBarItem(selected = tab == t, onClick = { onTab(t) }, icon = { Icon(icon, null) }, label = { Text(stringResource(t.label)) })
+            Screens(tab, Modifier.weight(1f).windowInsetsPadding(bars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)), onEdit)
         }
-    }
-}) { padding ->
-    // Towards the tab picked: right for one further on, left for one before.
-    AnimatedContent(tab, Modifier.padding(bottom = padding.calculateBottomPadding()), transitionSpec = {
-        val way = if (targetState.ordinal > initialState.ordinal) 1 else -1
-        (slideInHorizontally { way * it / 6 } + fadeIn()) togetherWith (slideOutHorizontally { -way * it / 6 } + fadeOut())
-    }, label = "tab") { shown ->
-        Box {
-            when (shown) {
-                Tab.Servers -> Home(onEdit)
-                Tab.Activity -> ActivityScreen()
-                Tab.Settings -> SettingsScreen()
+    } else {
+        Scaffold(bottomBar = {
+            NavigationBar {
+                Tab.entries.forEach { t ->
+                    NavigationBarItem(tab == t, { onTab(t) }, icon = { Icon(t.icon(), null) }, label = { Text(stringResource(t.label)) })
+                }
             }
+        }) { padding -> Screens(tab, Modifier.padding(bottom = padding.calculateBottomPadding()), onEdit) }
+    }
+}
+
+@Composable
+private fun Tab.icon(): Painter = when (this) {
+    Tab.Servers -> painterResource(R.drawable.ic_servers)
+    Tab.Activity -> painterResource(R.drawable.ic_activity)
+    Tab.Settings -> rememberVectorPainter(Icons.Outlined.Settings)
+}
+
+/** The tab's screen, sliding towards the tab picked: right for one further on, left for one before. */
+@Composable
+private fun Screens(tab: Tab, modifier: Modifier, onEdit: (Server?) -> Unit) = AnimatedContent(tab, modifier, transitionSpec = {
+    val way = if (targetState.ordinal > initialState.ordinal) 1 else -1
+    (slideInHorizontally { way * it / 6 } + fadeIn()) togetherWith (slideOutHorizontally { -way * it / 6 } + fadeOut())
+}, label = "tab") { shown ->
+    Box {
+        when (shown) {
+            Tab.Servers -> Home(onEdit)
+            Tab.Activity -> ActivityScreen()
+            Tab.Settings -> SettingsScreen()
         }
     }
 }

@@ -1,13 +1,17 @@
 package io.github.nfsandroid.ui.edit
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import io.github.nfsandroid.R
 import io.github.nfsandroid.data.Server
 import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.ui.common.Help
+import io.github.nfsandroid.ui.common.Section
 import io.github.nfsandroid.ui.common.Segmented
 import io.github.nfsandroid.ui.common.SwitchRow
 
@@ -21,7 +25,13 @@ private val LEVELS = mapOf(
 
 /** The server's lines in nfs-log.txt: on or off, the level, and what each category holds. */
 @Composable
-fun LogSettings(s: Server, onChange: (Server) -> Unit) {
+fun LogSection(s: Server, onChange: (Server) -> Unit) =
+    Section(stringResource(R.string.section_log), rememberVectorPainter(Icons.AutoMirrored.Outlined.List), stringResource(R.string.section_log_help)) {
+        LogSettings(s, onChange)
+    }
+
+@Composable
+private fun LogSettings(s: Server, onChange: (Server) -> Unit) {
     SwitchRow(stringResource(R.string.log_enabled), stringResource(R.string.log_enabled_help), s.logEnabled) {
         onChange(s.copy(logEnabled = it))
     }

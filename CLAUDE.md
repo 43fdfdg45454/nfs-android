@@ -33,8 +33,9 @@ etapa 2 está estable.
 
 - `app/src/main/kotlin/io/github/nfsandroid/`: `data` (servidores, `servers.json` con formato),
   `core` (montajes, confianza TLS, identidad de KeyChain, conexión), `service` (servicio en primer
-  plano), `provider` (DocumentsProvider: ids `servidor:ruta`, proxy de descriptores), `ui`
-  (Compose), `log` (`nfs-log.txt`: una línea por evento con nivel, categoría, servidor y campos
+  plano), `provider` (DocumentsProvider: ids `servidor:ruta`, proxy de descriptores; `thumbnail`:
+  estrategia de miniaturas por fuentes, tope de bytes, adjuntos de MKV), `ui` (Compose: edición
+  del servidor por páginas, lista y detalle; riel en horizontal; aspecto en `data/Look`), `log` (`nfs-log.txt`: una línea por evento con nivel, categoría, servidor y campos
   `clave=valor`, nivel por servidor en Avanzados; `crash-log.txt`).
 - `rust/` (nfs-ffi): el puente al núcleo con UniFFI (montaje, archivos, identidad de KeyChain con
   firma delegada). Depende de nfs-core por git a un commit fijo (`rev` en `rust/Cargo.toml`): se
@@ -57,7 +58,9 @@ etapa 2 está estable.
   ruta real con un usuario común, borrar o copiar un enlace conserva su destino; árboles de
   `ci/links.sh`) y subidas con escrituras de 8 KiB por una copia local y por el proxy, y lo que una
   app reescribe o acorta antes de cerrar (`UploadTest`, con la línea de cada subida en el log),
-  el formato y los niveles del log (`LogTest`) y los límites de bajada y subida (`RateTest`). Resultados por logcat (`nfs-test`) a una
+  el formato y los niveles del log (`LogTest`), los límites de bajada y subida (`RateTest`) y la
+  estrategia de miniaturas (`ThumbnailTest`: orden, casillas, adjunto de MKV sin leer el video,
+  tope). Resultados por logcat (`nfs-test`) a una
   anotación por grupo.
 - Seguridad (`security.yml`, en cada push y a diario): `cargo deny` sobre `rust/`, secretos en el
   historial (`ci/secrets.sh`), zizmor sobre los workflows, CodeQL (Kotlin, Rust, Actions); los

@@ -36,5 +36,4 @@ fun AdvancedSection(s: Server, onChange: (Server) -> Unit) =
             onChange(s.copy(disconnectMinutes = it))
         }
         Help(stringResource(R.string.disconnect_after_help))
-        LogSettings(s, onChange)
     }

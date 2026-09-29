@@ -21,7 +21,9 @@ follows GitHub releases (FFUpdater, Obtainium) keeps it current.
 
 ## Add a server
 
-Tap **Add server**. Each section of the form explains its options:
+Tap **Add server**. The settings are grouped in pages, each listed with what it holds now (and
+flagged when something needs fixing): one page at a time upright, the list and the page side by
+side in landscape or on a tablet. Each page explains its options:
 
 - **Connection**
   - **TCP · direct** to nfsd (port 2049): for the local network.
@@ -53,9 +55,21 @@ Tap **Add server**. Each section of the form explains its options:
   app writes a real file at full speed; the upload's progress and any error show in a
   notification); and the server's log: on or off, its level (errors, warnings, info or detail) and
   what each category holds.
+- **Thumbnails**: where they come from, in an order you drag, each one on or off: an image next to
+  the file as media servers keep them (`movie-poster.jpg`, `movie-thumb.jpg`, `movie.jpg`, then
+  the folder's `poster.jpg`, `folder.jpg`, `cover.jpg`), the picture a song or an MP4 carries, a
+  Matroska attachment (`cover.jpg`, found without reading the video), a photo's EXIF thumbnail
+  (off by default) and decoding (a video's frame, the whole image). The most one thumbnail may read
+  (32 MB by default) keeps a video without a cover from being downloaded for its icon.
 
 **Test the connection** tries it before saving. Then the server shows up in the file picker of
 every app, and **Browse** opens it in the system's Files app.
+
+## Appearance
+
+Settings › Appearance: light, dark or as the system is; the brand's colours, the wallpaper's
+(Material You) or another palette; pure black when dark (OLED screens); the text's size. The app
+works upright and sideways: sideways its tabs move to a rail and the servers to columns.
 
 ## Using it
 

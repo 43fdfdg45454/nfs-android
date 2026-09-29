@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,13 +56,14 @@ fun Home(onEdit: (Server?) -> Unit) {
         },
         contentWindowInsets = WindowInsets(0),
     ) { padding ->
-        LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
+        // As many columns as fit: one upright on a phone, two or more sideways or on a tablet.
+        LazyVerticalGrid(
+            GridCells.Adaptive(340.dp), Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item { Summary(live) }
-            if (servers.isEmpty()) item { EmptyState() }
+            item(span = { GridItemSpan(maxLineSpan) }) { Summary(live) }
+            if (servers.isEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { EmptyState() }
             items(servers, key = { it.id }) { server ->
                 Box(Modifier.animateItem()) {
                     val space = spaces[server.id] ?: Spaces.get(context, server.id)
@@ -70,7 +73,7 @@ fun Home(onEdit: (Server?) -> Unit) {
                     }) { onEdit(server) }
                 }
             }
-            if (servers.isNotEmpty()) item { Help(stringResource(R.string.hint_files_app), Modifier.padding(horizontal = 8.dp)) }
+            if (servers.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { Help(stringResource(R.string.hint_files_app), Modifier.padding(horizontal = 8.dp)) }
         }
     }
 }

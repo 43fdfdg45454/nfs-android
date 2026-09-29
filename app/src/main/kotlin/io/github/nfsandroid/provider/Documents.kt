@@ -8,6 +8,7 @@ import java.io.FileNotFoundException
 import io.github.nfsandroid.data.Server
 import uniffi.nfscore.Kind
 import uniffi.nfscore.Stat
+import io.github.nfsandroid.provider.thumbnail.Thumbnails
 
 /** Document ids ("server id:path under the export") and the rows describing documents. */
 object Documents {

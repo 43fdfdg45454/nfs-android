@@ -32,6 +32,11 @@ fun PerformanceSection(s: Server, onChange: (Server) -> Unit) {
         RateInput(stringResource(R.string.up_limit), s.upLimit, s.upUnit) { amount, unit -> onChange(s.copy(upLimit = amount, upUnit = unit)) }
         Help(stringResource(R.string.rate_help))
     }
+}
+
+/** Whether it shows up at all, and whether it can be written. */
+@Composable
+fun AccessSection(s: Server, onChange: (Server) -> Unit) {
     Section(stringResource(R.string.section_access), rememberVectorPainter(Icons.Outlined.Edit)) {
         SwitchRow(stringResource(R.string.enabled), stringResource(R.string.enabled_help), s.enabled) { onChange(s.copy(enabled = it)) }
         SwitchRow(stringResource(R.string.read_only), stringResource(R.string.read_only_help), s.readOnly) { onChange(s.copy(readOnly = it)) }

@@ -7,7 +7,10 @@ import android.provider.Settings.EXTRA_APP_PACKAGE
 import android.provider.Settings.EXTRA_CHANNEL_ID
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,9 +41,10 @@ fun SettingsScreen() {
     val context = LocalContext.current
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_settings)) }) }, contentWindowInsets = WindowInsets(0)) { padding ->
         androidx.compose.foundation.layout.Column(
-            Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).wrapContentWidth().widthIn(max = 720.dp).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            AppearanceSection()
             CacheSection()
             Section(stringResource(R.string.section_notification), rememberVectorPainter(Icons.Outlined.Notifications), stringResource(R.string.section_notification_help)) {
                 OutlinedButton(onClick = {

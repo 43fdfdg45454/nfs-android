@@ -18,6 +18,7 @@ import io.github.nfsandroid.data.ServerStore
 import io.github.nfsandroid.log.LogCategory
 import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
+import io.github.nfsandroid.provider.thumbnail.Thumbnails
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import java.io.FileNotFoundException
@@ -103,8 +104,7 @@ class NfsProvider : DocumentsProvider() {
 
     private fun thumbnail(id: String, size: android.graphics.Point) = nfs("thumbnail", id) { mount, path, server ->
         val stat = mount.stat(path)
-        val key = "$id:${stat.modified}:${stat.size}"
-        Thumbnails.get(context!!, server, "/$path", key, Documents.mime(stat), size) { runBlocking { mount.read(path) } }
+        Thumbnails.get(context!!, server, mount, path, "$id:${stat.modified}:${stat.size}", Documents.mime(stat), size)
     } ?: throw FileNotFoundException("no thumbnail for $id") // Thumbnails logged why
 
     override fun createDocument(parent: String, mimeType: String, name: String): String = nfs("create", parent) { mount, path, _ ->

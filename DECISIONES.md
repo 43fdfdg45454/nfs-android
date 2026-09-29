@@ -141,3 +141,20 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
 38. **Límites de bajada y subida por servidor** (Rendimiento): cantidad (0: sin límite) y unidad
     (kb/s, Mb/s, kB/s, MB/s; k = 1000), guardadas como se escribieron; el núcleo los aplica a todas
     las conexiones del servidor (`Config.rate`). `RateTest`: con 2 MB/s, 8 MiB no llegan antes.
+39. **Estrategia de miniaturas por servidor** (Miniaturas): fuentes en el orden que se arrastra,
+    cada una con su casilla: imagen junto al archivo (convenciones de Kodi, Jellyfin y Plex; el
+    listado de la carpeta se guarda 30 s), imagen incrustada, adjunto de MKV (cabecera, seek head y
+    nombres de los adjuntos, sin leer el video), EXIF (apagada: borrosa en una grilla) y
+    decodificar. Un tope de MB por miniatura (32 por defecto) para todas sus fuentes; al pasarlo la
+    búsqueda se corta. La caché de miniaturas depende también de la estrategia. Cada búsqueda deja
+    en el log la fuente, lo leído y las lecturas.
+40. **Edición del servidor por páginas** (lista y detalle, como los Ajustes de Android): General
+    (conexión y acceso), Red, Seguridad, Identidad, Rendimiento, Miniaturas, Avanzados, Log y
+    Probar, cada una con su resumen y un aviso si tiene algo que corregir; guardar con errores abre
+    la página del primero. Desde 720 dp de ancho, lista y página lado a lado.
+41. **Horizontal y vertical**: acostada (ancho ≥ 600 dp y mayor que el alto), las pestañas pasan a
+    un riel lateral y el contenido respeta barras y recorte de cámara; los servidores en columnas
+    (340 dp mínimo); el resto del contenido, 720 dp como máximo.
+42. **Aspecto** (Ajustes): tema del sistema, claro u oscuro; colores de la marca, del fondo de
+    pantalla (Material You) o tres paletas (bosque, atardecer, rosa); negro puro en oscuro; texto
+    chico, normal o grande (sobre el del sistema). Las barras del sistema siguen al tema de la app.

@@ -28,6 +28,10 @@ data class Server(
     val connections: Int = 0,
     val readAheadMb: Int = 256,
     val useCache: Boolean = true,
+    /** Thumbnails: the sources in the order they are tried, those turned off, and the most read for one. */
+    val thumbnailOrder: List<String> = ThumbnailSources.ALL,
+    val thumbnailOff: Set<String> = ThumbnailSources.OFF_BY_DEFAULT,
+    val thumbnailMaxMb: Int = 32,
     /** Caps on the transfer each way, as typed: an amount (0: none) in one of [Rates.UNITS]. */
     val downLimit: Int = 0,
     val downUnit: String = "Mbps",
@@ -62,6 +66,8 @@ data class Server(
         put("serverCopies", serverCopies); put("disconnectMinutes", disconnectMinutes); put("writeMode", writeMode)
         put("logEnabled", logEnabled); put("logLevel", logLevel); put("gatewaySecurity", gatewaySecurity)
         put("gatewayCertificateAlias", gatewayCertificateAlias)
+        put("thumbnailOrder", JSONArray(thumbnailOrder)); put("thumbnailOff", JSONArray(thumbnailOff.toList()))
+        put("thumbnailMaxMb", thumbnailMaxMb)
         put("downLimit", downLimit); put("downUnit", downUnit); put("upLimit", upLimit); put("upUnit", upUnit)
     }
 
@@ -74,6 +80,8 @@ data class Server(
         const val UMASK_STANDARD = 18 // 022: files 644, folders 755
         const val UMASK_GROUP = 2 // 002: files 664, folders 775
         const val UMASK_PRIVATE = 63 // 077: files 600, folders 700
+
+        private fun strings(a: JSONArray?) = a?.let { List(it.length()) { i -> it.getString(i) } }
 
         fun defaultPort(transport: String) = if (transport == "quic") 443 else 2049
 
@@ -96,6 +104,9 @@ data class Server(
             gatewaySecurity = o.optString("gatewaySecurity", "mtls"),
             gatewayCertificateAlias = if (o.has("gatewayCertificateAlias")) o.getString("gatewayCertificateAlias")
             else o.optString("certificateAlias").takeIf { o.optString("transport") == "quic" }.orEmpty(),
+            thumbnailOrder = ThumbnailSources.order(strings(o.optJSONArray("thumbnailOrder")) ?: ThumbnailSources.ALL),
+            thumbnailOff = strings(o.optJSONArray("thumbnailOff"))?.toSet() ?: ThumbnailSources.OFF_BY_DEFAULT,
+            thumbnailMaxMb = o.optInt("thumbnailMaxMb", 32),
             downLimit = o.optInt("downLimit"), downUnit = o.optString("downUnit", "Mbps"),
             upLimit = o.optInt("upLimit"), upUnit = o.optString("upUnit", "Mbps"),
         ).let { server ->
