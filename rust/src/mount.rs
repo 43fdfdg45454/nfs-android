@@ -16,6 +16,8 @@ pub struct Mount {
     pub(crate) export: String,
     /// Links to their own directory or one above it followed (loops for whatever walks folders).
     pub(crate) follow_up: bool,
+    /// Where the core runs: leaving (from a plain call) is done there, in the background.
+    runtime: tokio::runtime::Handle,
 }
 
 /// `name` in the directory at `path` ("" is the export's root).
@@ -54,6 +56,7 @@ impl Mount {
             engine: Engine::new(client, config),
             export: server.export,
             follow_up: server.follow_parent_links,
+            runtime: tokio::runtime::Handle::current(),
         }))
     }
 
@@ -146,9 +149,12 @@ impl Mount {
         Ok(Space { available, free, total })
     }
 
-    /// Closes the session's connections (named so, not `close`: Kotlin objects have one).
+    /// Leaves the server (named so, not `close`: Kotlin objects have one): every delegation goes
+    /// back, in the background, and the connections close. Unused, removed or edited, the server
+    /// keeps nothing another client's change would wait on while the app sleeps.
     pub fn disconnect(&self) {
-        self.engine.client().close();
+        let client = self.engine.client().clone();
+        self.runtime.spawn(async move { client.leave().await });
     }
 }
 
