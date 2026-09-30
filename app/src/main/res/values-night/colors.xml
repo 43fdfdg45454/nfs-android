@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- The window before Compose draws, dark as the theme's background. -->
     <color name="window">#FF0B1020</color>
 </resources>

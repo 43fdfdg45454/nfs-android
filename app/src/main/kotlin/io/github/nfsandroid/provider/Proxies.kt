@@ -1,5 +1,6 @@
 package io.github.nfsandroid.provider
 
+import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.ParcelFileDescriptor
@@ -84,14 +85,14 @@ object Proxies {
      * included). fsync puts what was written on the server's stable storage.
      */
     fun write(
-        storage: StorageManager, server: Server, document: String, name: String, file: WriteFile, via: String,
+        context: Context, storage: StorageManager, server: Server, document: String, name: String, file: WriteFile, via: String,
         size: Long = 0, readable: Boolean = false,
     ): ParcelFileDescriptor {
         val (thread, done) = thread(name) to writer(document)
         val callback = object : ProxyFileDescriptorCallback() {
             private var end = size
             private val gather = Gather(file)
-            private val upload = Upload(server, name, via)
+            private val upload = Upload(context, server, name, via)
 
             override fun onGetSize() = end
 

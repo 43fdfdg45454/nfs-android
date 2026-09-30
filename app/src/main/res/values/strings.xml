@@ -246,4 +246,16 @@
     <string name="text_normal">Normal</string>
     <string name="text_large">Large</string>
     <string name="look_text_help">On top of the system\'s own text size.</string>
+    <string name="section_server_cache">Cache</string>
+    <string name="section_server_cache_help">What of this server is kept on the phone</string>
+    <string name="cache_size_where">The cache\'s size, shared by every server, is in Settings › Local cache.</string>
+    <string name="summary_on">On</string>
+    <string name="summary_read_write">Read and write</string>
+    <string name="summary_connections">Connections: %1$s</string>
+    <string name="summary_auto">automatic</string>
+    <string name="upload_sent">%1$s sent</string>
+    <string name="upload_done">Uploaded: %1$s</string>
+    <string name="search_settings">Search the settings</string>
+    <string name="search_none">Nothing matches.</string>
+    <string name="search_clear">Clear</string>
 </resources>

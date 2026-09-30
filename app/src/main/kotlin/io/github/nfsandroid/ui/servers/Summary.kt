@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -19,15 +18,15 @@ import androidx.compose.ui.unit.dp
 import io.github.nfsandroid.R
 import io.github.nfsandroid.core.Live
 import io.github.nfsandroid.ui.common.Format
-import io.github.nfsandroid.ui.theme.Brand
 
 /** All servers together: throughput both ways, connections up and calls in flight. */
 @Composable
 fun Summary(live: Live.State) {
     val context = LocalContext.current
-    val soft = Color.White.copy(alpha = 0.85f)
+    val on = MaterialTheme.colorScheme.onPrimary
+    val soft = on.copy(alpha = 0.85f)
     Column(
-        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(Brand.gradient).padding(20.dp),
+        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(accent()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         val servers = live.servers
@@ -36,8 +35,8 @@ fun Summary(live: Live.State) {
             style = MaterialTheme.typography.labelLarge, color = soft,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            Text("↓ ${Format.rate(context, live.down)}", style = MaterialTheme.typography.headlineSmall, color = Color.White)
-            Text("↑ ${Format.rate(context, live.up)}", style = MaterialTheme.typography.headlineSmall, color = Color.White)
+            Text("↓ ${Format.rate(context, live.down)}", style = MaterialTheme.typography.headlineSmall, color = on)
+            Text("↑ ${Format.rate(context, live.up)}", style = MaterialTheme.typography.headlineSmall, color = on)
         }
         Text(
             if (servers.isEmpty()) {

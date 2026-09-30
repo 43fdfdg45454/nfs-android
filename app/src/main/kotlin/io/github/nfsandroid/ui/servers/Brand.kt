@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,16 +25,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.nfsandroid.R
 import io.github.nfsandroid.ui.common.Help
-import io.github.nfsandroid.ui.theme.Brand
 
-/** The app's mark, as in its icon. */
+/** The app's mark, as in its icon, in the look's colours. */
 @Composable
 fun Logo(size: Dp) = Box(
-    Modifier.size(size).clip(MaterialTheme.shapes.medium).background(Brand.gradient),
+    Modifier.size(size).clip(MaterialTheme.shapes.medium).background(accent()),
     contentAlignment = Alignment.Center,
 ) {
-    Icon(painterResource(R.drawable.ic_launcher_foreground), null, Modifier.size(size).graphicsLayer(scaleX = 1.45f, scaleY = 1.45f), tint = Color.White)
+    Icon(
+        painterResource(R.drawable.ic_launcher_foreground), null, Modifier.size(size).graphicsLayer(scaleX = 1.45f, scaleY = 1.45f),
+        tint = MaterialTheme.colorScheme.onPrimary,
+    )
 }
+
+/** The look's gradient: its primary colour to its secondary. */
+@Composable
+fun accent() = Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary))
 
 @Composable
 fun Wordmark() = Row(verticalAlignment = Alignment.CenterVertically) {

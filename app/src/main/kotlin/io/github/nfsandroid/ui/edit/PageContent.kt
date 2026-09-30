@@ -21,10 +21,9 @@ fun PageContent(page: Page, s: Server, problems: Problems, modifier: Modifier = 
     Box(modifier.imePadding().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             when (page) {
-                Page.General -> {
-                    ConnectionSection(s, problems, onChange)
-                    AccessSection(s, onChange)
-                }
+                Page.General -> ConnectionSection(s, problems, onChange)
+                Page.Access -> AccessSection(s, onChange)
+                Page.Cache -> CacheSection(s, onChange)
                 Page.Network -> NetworkSection(s, problems.subnet, onChange)
                 Page.Security -> SecuritySection(s, onChange)
                 Page.Identity -> IdentitySection(s, onChange)

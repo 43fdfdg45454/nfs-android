@@ -37,7 +37,7 @@ object StatusNotification {
         val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         return Notification.Builder(context, ConnectionService.CHANNEL)
             .setSmallIcon(R.drawable.ic_stat)
-            .setColor(context.getColor(R.color.brand))
+            .setColor(io.github.nfsandroid.ui.theme.Palettes.accent(context))
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(Notification.BigTextStyle().bigText(expanded))

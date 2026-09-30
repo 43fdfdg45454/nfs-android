@@ -1,7 +1,10 @@
 package io.github.nfsandroid.ui.theme
 
+import android.content.Context
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import io.github.nfsandroid.data.Look
 
 /**
  * The palettes besides the brand's and the wallpaper's: the brand's scheme with other accents (its
@@ -41,4 +44,10 @@ object Palettes {
         surfaceContainerLow = Color(0xFF0B0B0F), surfaceContainer = Color(0xFF121218),
         surfaceContainerHigh = Color(0xFF1A1A22), surfaceContainerHighest = Color(0xFF22222C),
     )
+
+    /** The look's main colour, for what is drawn outside the app (the notifications' accent). */
+    fun accent(context: Context): Int = when (val palette = Look.state.value.palette) {
+        "wallpaper" -> context.getColor(android.R.color.system_accent1_600)
+        else -> swatch(palette).first().toArgb()
+    }
 }

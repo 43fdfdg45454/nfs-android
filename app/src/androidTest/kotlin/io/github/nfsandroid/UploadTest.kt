@@ -1,5 +1,7 @@
 package io.github.nfsandroid
 
+import android.app.Notification
+import android.app.NotificationManager
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -61,13 +63,25 @@ class UploadTest {
         for (field in listOf("via=$via", "size=67.1MB", "writing=", "core=", "closing=")) assertTrue("$field in $line", field in line)
     }
 
+    /** An upload that took over a second leaves a note of how it went, whichever way it went. */
+    private fun noted(server: String) {
+        val done = Provider.context.getString(io.github.nfsandroid.R.string.upload_done, "")
+        val notes = Provider.context.getSystemService(NotificationManager::class.java).activeNotifications.map { it.notification.extras }
+        assertTrue("no note of the upload to $server", notes.any {
+            it.getCharSequence(Notification.EXTRA_TITLE).toString() == "upload-$server.bin" &&
+                it.getCharSequence(Notification.EXTRA_TEXT).toString().startsWith(done)
+        })
+    }
+
     @Test
     fun uploadsThroughALocalCopyAndThroughTheProxy() {
         setUp()
         Provider.report("Upload 64 MiB by 8 KiB writes, local copy: ${upload("ci-local", 8 shl 10)}")
         logged("ci-local", "local")
+        noted("ci-local")
         Provider.report("Upload 64 MiB by 8 KiB writes, file proxy: ${upload("ci", 8 shl 10)} (${ProxyStats.Writes})")
         logged("ci", "proxy")
+        noted("ci")
     }
 
     @Test

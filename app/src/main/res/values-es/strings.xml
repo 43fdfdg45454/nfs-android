@@ -245,4 +245,16 @@
     <string name="text_normal">Normal</string>
     <string name="text_large">Grande</string>
     <string name="look_text_help">Sobre el tamaño de texto del sistema.</string>
+    <string name="section_server_cache">Caché</string>
+    <string name="section_server_cache_help">Lo que se guarda de este servidor en el teléfono</string>
+    <string name="cache_size_where">El tamaño de la caché, compartida por todos los servidores, está en Ajustes › Caché local.</string>
+    <string name="summary_on">Activado</string>
+    <string name="summary_read_write">Lectura y escritura</string>
+    <string name="summary_connections">Conexiones: %1$s</string>
+    <string name="summary_auto">automático</string>
+    <string name="upload_sent">%1$s enviados</string>
+    <string name="upload_done">Subido: %1$s</string>
+    <string name="search_settings">Buscar una opción</string>
+    <string name="search_none">No hay nada que coincida.</string>
+    <string name="search_clear">Borrar</string>
 </resources>

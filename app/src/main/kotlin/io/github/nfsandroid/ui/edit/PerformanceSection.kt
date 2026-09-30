@@ -14,9 +14,8 @@ import io.github.nfsandroid.ui.common.Help
 import io.github.nfsandroid.ui.common.SwitchRow
 
 private val CONNECTIONS = listOf(0, 2, 4, 8, 12, 16, 24, 32, 48, 64)
-private val READ_AHEAD_MB = listOf(16, 32, 64, 128, 256, 512, 768, 1024)
 
-/** How much the server is asked at once, and how far ahead a player is read. */
+/** How much the server is asked at once, and how fast it may go each way. */
 @Composable
 fun PerformanceSection(s: Server, onChange: (Server) -> Unit) {
     Section(stringResource(R.string.section_performance), painterResource(R.drawable.ic_activity), stringResource(R.string.section_performance_help)) {
@@ -24,10 +23,6 @@ fun PerformanceSection(s: Server, onChange: (Server) -> Unit) {
             stringResource(if (s.transport == "quic") R.string.streams else R.string.connections), s.connections, CONNECTIONS, "",
             stringResource(R.string.connections_help, if (s.transport == "quic") 4 else 8),
         ) { onChange(s.copy(connections = it)) }
-        AmountInput(stringResource(R.string.read_ahead), s.readAheadMb, READ_AHEAD_MB, "MB", stringResource(R.string.read_ahead_help)) {
-            onChange(s.copy(readAheadMb = it))
-        }
-        SwitchRow(stringResource(R.string.use_cache), stringResource(R.string.use_cache_help), s.useCache) { onChange(s.copy(useCache = it)) }
         RateInput(stringResource(R.string.down_limit), s.downLimit, s.downUnit) { amount, unit -> onChange(s.copy(downLimit = amount, downUnit = unit)) }
         RateInput(stringResource(R.string.up_limit), s.upLimit, s.upUnit) { amount, unit -> onChange(s.copy(upLimit = amount, upUnit = unit)) }
         Help(stringResource(R.string.rate_help))

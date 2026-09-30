@@ -3,7 +3,6 @@ package io.github.nfsandroid.provider
 import android.content.Context
 import io.github.nfsandroid.core.Mounts
 import io.github.nfsandroid.data.Server
-import io.github.nfsandroid.service.UploadNotice
 import java.io.File
 import java.io.RandomAccessFile
 import java.security.MessageDigest
@@ -25,7 +24,7 @@ class Uploader(
     private val file: WriteFile,
 ) {
     private val digests = HashMap<Long, ByteArray>()
-    private val upload = Upload(server, path, "local")
+    private val upload = Upload(context, server, path, "local")
     private var sent = 0L
     private var end = 0L
 
@@ -34,7 +33,6 @@ class Uploader(
             RandomAccessFile(local, "r").use { copy ->
                 while (!closed.await(100, TimeUnit.MILLISECONDS)) {
                     while (copy.length() - sent >= BLOCK) send(copy, sent, BLOCK, keep = true).also { sent += BLOCK }
-                    UploadNotice.progress(context, path, sent, copy.length())
                 }
                 upload.closed()
                 val size = copy.length()
@@ -48,17 +46,12 @@ class Uploader(
                     val n = minOf(BLOCK.toLong(), size - sent).toInt()
                     send(copy, sent, n, keep = false)
                     sent += n
-                    UploadNotice.progress(context, path, sent, size)
                 }
                 runBlocking { file.finish() }
                 if (end > size) runBlocking { Mounts.get(server).resize(path, size.toULong()) }
             }
             upload.done()
-            UploadNotice.done(context, path)
-        }.onFailure {
-            upload.failed(it)
-            UploadNotice.failed(context, path, it.message.orEmpty())
-        }
+        }.onFailure { upload.failed(it) }
         file.close()
     }
 
@@ -68,7 +61,7 @@ class Uploader(
         val begin = System.nanoTime()
         runBlocking { Mounts.get(server) } // in use: the mount is not closed as idle meanwhile
         file.writeBlocking(at.toULong(), bytes)
-        upload.piece(size, System.nanoTime() - begin)
+        upload.piece(size, System.nanoTime() - begin, copy.length())
         end = maxOf(end, at + size)
     }
 

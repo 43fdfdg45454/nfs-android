@@ -150,10 +150,15 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     pasarlo, esa fuente se descarta (su imagen quedaría a medias) y se prueba la siguiente. Las
     demás leen solo lo que necesitan. La caché de miniaturas depende también de la estrategia. Cada búsqueda deja
     en el log la fuente, lo leído y las lecturas.
-40. **Edición del servidor por páginas** (lista y detalle, como los Ajustes de Android): General
-    (conexión y acceso), Red, Seguridad, Identidad, Rendimiento, Miniaturas, Avanzados, Log y
-    Probar, cada una con su resumen y un aviso si tiene algo que corregir; guardar con errores abre
-    la página del primero. Desde 720 dp de ancho, lista y página lado a lado.
+40. **Edición del servidor por páginas** (lista y detalle, como los Ajustes de Android): Conexión,
+    Red, Seguridad, Identidad, Acceso, Rendimiento, Caché, Miniaturas, Avanzados, Log y Probar, cada
+    una con su resumen y un aviso si tiene algo que corregir; guardar con errores abre la página del
+    primero. Desde 720 dp de ancho, lista y página lado a lado. Un buscador sobre la lista encuentra
+    cualquier opción por su nombre, su ayuda o su página (sin distinguir acentos) y abre su página.
+43. **Avisos de subida por los dos caminos** (proxy y copia local): progreso a partir del primer
+    segundo (por el proxy, lo enviado, porque el tamaño no se sabe hasta el final), una nota al
+    terminar con tamaño, tiempo y velocidad que se va sola a los 10 s, y el error. El logo, el
+    resumen de velocidades y el acento de las notificaciones siguen la paleta elegida.
 41. **Horizontal y vertical**: acostada (ancho ≥ 600 dp y mayor que el alto), las pestañas pasan a
     un riel lateral y el contenido respeta barras y recorte de cámara; los servidores en columnas
     (340 dp mínimo); el resto del contenido, 720 dp como máximo.

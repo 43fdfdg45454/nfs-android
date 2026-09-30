@@ -83,14 +83,14 @@ class NfsProvider : DocumentsProvider() {
             "w", "wt" -> mount.create(path, exclusive = false).let { file ->
                 val via = if (server.writeMode != "local") "proxy" else if (Staged.room(context!!)) "local" else "proxy-low-space"
                 opened(server, path, mode, via)
-                if (via == "local") Staged.write(context!!, server, id, path, file) else Proxies.write(storage, server, id, path, file, via)
+                if (via == "local") Staged.write(context!!, server, id, path, file) else Proxies.write(context!!, storage, server, id, path, file, via)
             }
             // In place: "rw" reads and writes, "rwt" empties it first, "wa" appends (the
             // descriptor starts at the end: the proxy does not know O_APPEND).
             else -> {
                 val size = if (truncate) 0L else mount.stat(path).size.toLong()
                 opened(server, path, mode, "proxy-edit")
-                Proxies.write(storage, server, id, path, mount.edit(path, truncate), "proxy-edit", size, readable = 'r' in mode)
+                Proxies.write(context!!, storage, server, id, path, mount.edit(path, truncate), "proxy-edit", size, readable = 'r' in mode)
                     .also { if (mode == "wa") Os.lseek(it.fileDescriptor, size, OsConstants.SEEK_SET) }
             }
         }

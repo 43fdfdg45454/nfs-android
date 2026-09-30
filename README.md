@@ -23,7 +23,8 @@ follows GitHub releases (FFUpdater, Obtainium) keeps it current.
 
 Tap **Add server**. The settings are grouped in pages, each listed with what it holds now (and
 flagged when something needs fixing): one page at a time upright, the list and the page side by
-side in landscape or on a tablet. Each page explains its options:
+side in landscape or on a tablet. The search box above the pages finds any option by its name or
+its help. Each page explains its options:
 
 - **Connection**
   - **TCP · direct** to nfsd (port 2049): for the local network.
@@ -43,18 +44,21 @@ side in landscape or on a tablet. Each page explains its options:
 - **Identity**: the UID/GID your files belong to on the server (with `all_squash` it does not
   matter), and the permissions of what you create: standard (644, folders 755), group (664, 775),
   private (600, 700) or any umask.
-- **Performance**: connections, read-ahead (256 MB by default), the local cache, and caps on
-  downloads and uploads (an amount in kb/s, Mb/s, kB/s or MB/s; 0: none) across all of the
-  server's connections.
+- **Access**: the server on or off (off, it stays saved but out of the pickers), read-only.
+- **Performance**: connections, and caps on downloads and uploads (an amount in kb/s, Mb/s, kB/s or
+  MB/s; 0: none) across all of the server's connections.
+- **Cache**: whether this server uses the local cache, and how far ahead a player is read (256 MB
+  by default). The cache's size, for every server, is in Settings › Local cache.
 - **Advanced**: edge cases, with sensible defaults. Following symbolic links to their own folder
   or one above it (off: apps that go through whole folders would loop through them); copies made
   by the server (on; off, the file manager copies through the phone, with progress); disconnecting
   when unused (after 5 minutes; 1, 15, 60 or never); how files written whole reach the server:
   Android's file proxy (by default: each write has a cost, slow for apps that write in small
   pieces, but the app knows when the server has it all) or a local copy uploaded as it grows (the
-  app writes a real file at full speed; the upload's progress and any error show in a
-  notification); and the server's log: on or off, its level (errors, warnings, info or detail) and
-  what each category holds.
+  app writes a real file at full speed). Either way, an upload that takes over a second shows its
+  progress in a notification, then a note of how it went, or its error.
+- **Log**: this server's lines in `nfs-log.txt`: on or off, its level (errors, warnings, info or
+  detail) and what each category holds.
 - **Thumbnails**: where they come from, in an order you drag, each one on or off: an image next to
   the file as media servers keep them (`movie-poster.jpg`, `movie-thumb.jpg`, `movie.jpg`, then
   the folder's `poster.jpg`, `folder.jpg`, `cover.jpg`), the picture a song or an MP4 carries, a

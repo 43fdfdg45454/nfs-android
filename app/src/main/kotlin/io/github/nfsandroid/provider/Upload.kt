@@ -1,11 +1,14 @@
 package io.github.nfsandroid.provider
 
+import android.content.Context
 import io.github.nfsandroid.data.Server
 import io.github.nfsandroid.log.LogCategory
 import io.github.nfsandroid.log.LogLevel
 import io.github.nfsandroid.log.NfsLog
 import io.github.nfsandroid.log.NfsLog.megabytes
 import io.github.nfsandroid.log.NfsLog.seconds
+import io.github.nfsandroid.service.UploadNotice
+import io.github.nfsandroid.ui.common.Format
 import java.util.Locale
 
 /**
@@ -15,17 +18,19 @@ import java.util.Locale
  * all. [via] says how: "local" (a local copy), or the proxy and why ("proxy" as set, "proxy-edit" for
  * a file edited in place, "proxy-low-space" when there was no room for a local copy).
  */
-class Upload(private val server: Server, private val name: String, private val via: String) {
+class Upload(private val context: Context, private val server: Server, private val name: String, private val via: String) {
     private val start = System.nanoTime()
     private var bytes = 0L
     private var pieces = 0L
     private var core = 0L
     private var closed = 0L
 
-    fun piece(size: Int, nanos: Long) {
+    /** [size] bytes handed to the core in [nanos]; [of], the whole file's size when known (a local copy's). */
+    fun piece(size: Int, nanos: Long, of: Long = 0) {
         bytes += size
         pieces++
         core += nanos
+        UploadNotice.progress(context, name, bytes, of)
     }
 
     /** The app closed the file. */
@@ -43,10 +48,16 @@ class Upload(private val server: Server, private val name: String, private val v
             "pieces" to pieces, "piece" to "${bytes / pieces / 1024}KiB", "writing" to seconds(closedAt - start),
             "core" to seconds(core), "closing" to seconds(end - closedAt),
         )
+        val took = (end - start) / 1e9
+        val summary = "${Format.bytes(bytes)} · %.1f s · ${Format.rate(context, (bytes / took).toLong())}".format(took)
+        UploadNotice.done(context, name, summary)
     }
 
-    fun failed(e: Throwable) = NfsLog.log(
-        LogLevel.ERROR, LogCategory.UPLOADS, server, "upload failed", "file" to name, "via" to via,
-        "sent" to megabytes(bytes), "error" to NfsLog.reason(e),
-    )
+    fun failed(e: Throwable) {
+        NfsLog.log(
+            LogLevel.ERROR, LogCategory.UPLOADS, server, "upload failed", "file" to name, "via" to via,
+            "sent" to megabytes(bytes), "error" to NfsLog.reason(e),
+        )
+        UploadNotice.failed(context, name, NfsLog.reason(e))
+    }
 }
