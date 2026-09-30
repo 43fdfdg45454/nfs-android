@@ -155,7 +155,10 @@ Decisiones vigentes tomadas sin consulta. Cada una dice qué se decidió y por q
     una con su resumen y un aviso si tiene algo que corregir; guardar con errores abre la página del
     primero. Desde 720 dp de ancho, lista y página lado a lado. Un buscador sobre la lista encuentra
     cualquier opción por su nombre, su ayuda o su página (sin distinguir acentos) y abre su página.
-43. **Avisos de subida por los dos caminos** (proxy y copia local): progreso a partir del primer
+43. **Avisos de subida por los dos caminos** (proxy y copia local), en un canal apagado por
+    defecto (la app que copia suele mostrar su progreso; se activa en los ajustes de Android; canal
+    nuevo porque el anterior estaba encendido y una app no puede bajarle la importancia); los
+    errores, en otro canal encendido. Progreso a partir del primer
     segundo (por el proxy, lo enviado, porque el tamaño no se sabe hasta el final), una nota al
     terminar con tamaño, tiempo y velocidad que se va sola a los 10 s, y el error. El logo, el
     resumen de velocidades y el acento de las notificaciones siguen la paleta elegida.

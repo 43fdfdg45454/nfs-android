@@ -1,6 +1,5 @@
 package io.github.nfsandroid
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.net.Uri
 import android.provider.DocumentsContract
@@ -10,6 +9,7 @@ import io.github.nfsandroid.data.ServerStore
 import io.github.nfsandroid.provider.Proxies
 import io.github.nfsandroid.provider.ProxyStats
 import io.github.nfsandroid.provider.Staged
+import io.github.nfsandroid.service.UploadNotice
 import io.github.nfsandroid.log.NfsLog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -63,14 +63,17 @@ class UploadTest {
         for (field in listOf("via=$via", "size=67.1MB", "writing=", "core=", "closing=")) assertTrue("$field in $line", field in line)
     }
 
-    /** An upload that took over a second leaves a note of how it went, whichever way it went. */
+    /**
+     * An upload that took over a second leaves a note of how it went, whichever way it went, on a
+     * channel off until turned on (failures, on one that is heard).
+     */
     private fun noted(server: String) {
         val done = Provider.context.getString(io.github.nfsandroid.R.string.upload_done, "")
-        val notes = Provider.context.getSystemService(NotificationManager::class.java).activeNotifications.map { it.notification.extras }
-        assertTrue("no note of the upload to $server", notes.any {
-            it.getCharSequence(Notification.EXTRA_TITLE).toString() == "upload-$server.bin" &&
-                it.getCharSequence(Notification.EXTRA_TEXT).toString().startsWith(done)
-        })
+        val note = UploadNotice.posted["upload-$server.bin"]
+        assertTrue("no note of the upload to $server: $note", note?.startsWith(done) == true)
+        val channels = Provider.context.getSystemService(NotificationManager::class.java)
+        assertEquals(NotificationManager.IMPORTANCE_NONE, channels.getNotificationChannel(UploadNotice.PROGRESS).importance)
+        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, channels.getNotificationChannel(UploadNotice.FAILED).importance)
     }
 
     @Test

@@ -16,18 +16,37 @@ import java.util.concurrent.ConcurrentHashMap
  * a note when it ends that goes by itself, and a failure.
  */
 object UploadNotice {
-    /** Progress and ends, quietly; failures, heard: each can be silenced on its own. */
-    private const val PROGRESS = "upload_progress"
-    private const val FAILED = "upload_failed"
+    /**
+     * Progress and ends: off until turned on in Android's settings (the app that copies shows its
+     * own). A new channel: the one before was on, and an app cannot turn down one that exists.
+     */
+    const val PROGRESS = "uploads"
+    private const val BEFORE = "upload_progress"
+    /** Failures, heard: the app that wrote the file may no longer be told. */
+    const val FAILED = "upload_failed"
     private const val SECOND = 1000L
     private val started = ConcurrentHashMap<String, Long>()
     private val shown = ConcurrentHashMap<String, Long>()
 
+    /** The last text posted for each file, whether its channel shows it or not (diagnosis, tests). */
+    val posted = ConcurrentHashMap<String, String>()
+
     private fun manager(context: Context) = context.getSystemService(NotificationManager::class.java).apply {
+        if (getNotificationChannel(PROGRESS) == null) {
+            deleteNotificationChannel(BEFORE)
+            createNotificationChannel(
+                NotificationChannel(PROGRESS, context.getString(R.string.channel_upload_progress), NotificationManager.IMPORTANCE_NONE)
+                    .apply { description = context.getString(R.string.channel_upload_progress_help) },
+            )
+        }
         if (getNotificationChannel(FAILED) == null) {
-            createNotificationChannel(NotificationChannel(PROGRESS, context.getString(R.string.channel_upload_progress), NotificationManager.IMPORTANCE_LOW))
             createNotificationChannel(NotificationChannel(FAILED, context.getString(R.string.channel_upload_failed), NotificationManager.IMPORTANCE_DEFAULT))
         }
+    }
+
+    private fun post(context: Context, path: String, text: String, notification: Notification) {
+        posted[path] = text
+        manager(context).notify(path.hashCode(), notification)
     }
 
     private fun builder(context: Context, channel: String, path: String) = Notification.Builder(context, channel)
@@ -39,13 +58,14 @@ object UploadNotice {
         if (now - started.getOrPut(path) { now } < SECOND || now - (shown[path] ?: 0) < SECOND) return
         shown[path] = now
         val builder = builder(context, PROGRESS, path).setOngoing(true).setOnlyAlertOnce(true)
-        if (size > 0) {
-            builder.setContentText(context.getString(R.string.upload_progress, Format.bytes(sent), Format.bytes(size)))
-                .setProgress(100, (sent * 100 / size).coerceAtMost(100).toInt(), false)
+        val text = if (size > 0) {
+            builder.setProgress(100, (sent * 100 / size).coerceAtMost(100).toInt(), false)
+            context.getString(R.string.upload_progress, Format.bytes(sent), Format.bytes(size))
         } else {
-            builder.setContentText(context.getString(R.string.upload_sent, Format.bytes(sent))).setProgress(0, 0, true)
+            builder.setProgress(0, 0, true)
+            context.getString(R.string.upload_sent, Format.bytes(sent))
         }
-        manager(context).notify(path.hashCode(), builder.build())
+        post(context, path, text, builder.setContentText(text).build())
     }
 
     /** Ended: what was shown becomes a note of how it went, gone in 10 s. */
@@ -53,13 +73,13 @@ object UploadNotice {
         started.remove(path)
         if (shown.remove(path) == null) return
         val text = context.getString(R.string.upload_done, summary)
-        manager(context).notify(path.hashCode(), builder(context, PROGRESS, path).setContentText(text).setAutoCancel(true).setTimeoutAfter(10 * SECOND).build())
+        post(context, path, text, builder(context, PROGRESS, path).setContentText(text).setAutoCancel(true).setTimeoutAfter(10 * SECOND).build())
     }
 
     fun failed(context: Context, path: String, reason: String) {
         started.remove(path)
         shown.remove(path)
         val text = context.getString(R.string.upload_failed, reason)
-        manager(context).notify(path.hashCode(), builder(context, FAILED, path).setContentText(text).setStyle(Notification.BigTextStyle().bigText(text)).build())
+        post(context, path, text, builder(context, FAILED, path).setContentText(text).setStyle(Notification.BigTextStyle().bigText(text)).build())
     }
 }

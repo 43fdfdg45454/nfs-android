@@ -257,4 +257,5 @@
     <string name="search_settings">Buscar una opción</string>
     <string name="search_none">No hay nada que coincida.</string>
     <string name="search_clear">Borrar</string>
+    <string name="channel_upload_progress_help">Apagado hasta que lo actives acá: el progreso de cada subida (desde su primer segundo) y una nota al terminar. La app que copia suele mostrar el suyo.</string>
 </resources>

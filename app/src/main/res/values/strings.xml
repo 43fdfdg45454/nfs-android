@@ -258,4 +258,5 @@
     <string name="search_settings">Search the settings</string>
     <string name="search_none">Nothing matches.</string>
     <string name="search_clear">Clear</string>
+    <string name="channel_upload_progress_help">Off until turned on here: each upload\'s progress (from its first second) and a note when it ends. The app that copies usually shows its own.</string>
 </resources>

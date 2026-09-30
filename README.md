@@ -55,8 +55,9 @@ its help. Each page explains its options:
   when unused (after 5 minutes; 1, 15, 60 or never); how files written whole reach the server:
   Android's file proxy (by default: each write has a cost, slow for apps that write in small
   pieces, but the app knows when the server has it all) or a local copy uploaded as it grows (the
-  app writes a real file at full speed). Either way, an upload that takes over a second shows its
-  progress in a notification, then a note of how it went, or its error.
+  app writes a real file at full speed). Either way, an upload that takes over a second can show its
+  progress in a notification and then a note of how it went (the "Uploads in progress" channel, off
+  until turned on in Android's notification settings); a failed upload always shows its error.
 - **Log**: this server's lines in `nfs-log.txt`: on or off, its level (errors, warnings, info or
   detail) and what each category holds.
 - **Thumbnails**: where they come from, in an order you drag, each one on or off: an image next to
